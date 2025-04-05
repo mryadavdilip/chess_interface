@@ -1,0 +1,30 @@
+name: chess_interface
+description: "A chess interface for the chess engine with all basic functionalities like move, undo, redo, etc. and a chess board widget with custom themes."
+version: 1.0.0
+homepage: github.com/mryadavdilip/chess_interface
+
+environment:
+  sdk: ^3.7.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  gradient_circular_progress_indicator: ^0.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # To add assets to your package, add an assets section, like this:
+  assets:
+    - assets/
+    - assets/modern_minimalist
+    - assets/silhoutte_minimalist
