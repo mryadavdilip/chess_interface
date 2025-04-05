@@ -28,7 +28,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.0
+  chess_interface: ^1.0.1
 ```
 
 Then import these:
@@ -101,11 +101,18 @@ It supports:
 - Castling logic (including history tracking)
 - En passant and double pawn pushes
 
+### Arbiter
+
+Arbiter to handle events like game over, time out and pawn promotion:
+
+## And more..
+
 ## File Structure
 
 - `chess_board_widget.dart` – Main UI and logic
 - `move_validator.dart` – Move legality checker
 - `piece.dart` – Piece model and asset loader
+- `arbiter.dart` – Game over, timOut, and promotion handler
 - `board_theme_config.dart` – Customization config
 - `color_extension.dart` – Color manipulation utilities
 - `interface.dart` – Board interaction interface
