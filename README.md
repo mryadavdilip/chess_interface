@@ -1,3 +1,6 @@
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/mryadavdilip)
+
+
 # chess_interface
 
 A customizable, feature-rich chess board widget built in Flutter. This package offers a robust foundation for integrating chess gameplay into your Flutter apps — complete with piece rendering, move validation, theming, and more.
@@ -21,11 +24,19 @@ dependencies:
     git:
       url: https://github.com/mryadavdilip/chess_interface.git
 ```
+OR
 
-Then import it:
+```yaml
+dependencies:
+  chess_interface: ^1.0.0
+```
+
+Then import these:
 
 ```dart
 import 'package:chess_board_widget/chess_board_widget.dart';
+import 'package:chess_board_widget/logical_interface/interface.dart';
+import 'package:chess_board_widget/models/BoardThemeConfig.dart';
 ```
 
 ## Example
