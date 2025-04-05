@@ -1,3 +1,4 @@
+import 'package:chess_interface/arbiter/arbiter.dart';
 import 'package:chess_interface/utils/color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
@@ -7,6 +8,12 @@ import 'package:chess_interface/logical_interface/piece.dart';
 
 class ChessBoardWidget extends StatefulWidget {
   final ChessBoardInterface game;
+  final Arbiter arbiter;
+
+  /// If true, arbiter will spectate the game and check for checkmate or stalemate.
+  /// If false, the game will be played without arbiter's intervention.
+  /// This is useful for testing purposes or if you want to handle game logic manually.
+  final bool spectateInitially;
 
   /// It should be used to show the promotion dialog when a pawn reaches the last rank, or pawn on the last rank is tapped. Use [game].promotePawn([Position], [PieceType]) to promote the pawn.
   final ValueChanged<Position>? onPromotion;
@@ -21,6 +28,8 @@ class ChessBoardWidget extends StatefulWidget {
   const ChessBoardWidget({
     super.key,
     required this.game,
+    required this.arbiter,
+    this.spectateInitially = true,
     this.onPromotion,
     this.onCheckmate,
     required this.boardSize,
@@ -35,7 +44,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
   Position? selectedPosition;
   List<Position> validMoves = [];
 
-  void onSquareTap(int row, int col) {
+  void _onSquareTap(int row, int col) {
     Position tappedPosition = Position(row: row, col: col);
     ChessPiece? piece = widget.game.getPiece(tappedPosition);
 
@@ -44,9 +53,9 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
         piece.color == widget.game.turn &&
         piece.type == PieceType.pawn &&
         (tappedPosition.row == 0 || tappedPosition.row == 7)) {
-      widget.onPromotion == null
-          ? _defaultPromotionDialog(tappedPosition)
-          : widget.onPromotion!(tappedPosition);
+      widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
+        if (v) setState(() {});
+      });
       return; // Exit so that the normal selection/move logic isn't executed.
     }
 
@@ -59,12 +68,12 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
     } else {
       // If a piece is already selected, attempt to move it.
       if (widget.game.move(selectedPosition!, tappedPosition)) {
-        checkForPawnPromotion(tappedPosition);
-        if (widget.game.isCheckmate()) {
-          widget.onCheckmate == null
-              ? _defaultCheckmateDialog(widget.game.turn)
-              : widget.onCheckmate!(widget.game.turn);
-        }
+        widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
+          if (v) setState(() {});
+        });
+        widget.arbiter.spectateForGameEnd(widget.game).then((v) {
+          if (v) setState(() {});
+        });
       }
       selectedPosition = null;
       validMoves = [];
@@ -72,67 +81,14 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
     setState(() {});
   }
 
-  void checkForPawnPromotion(Position position) {
-    ChessPiece? piece = widget.game.getPiece(position);
-    if (piece?.type == PieceType.pawn) {
-      if (position.row == 0 || position.row == 7) {
-        widget.onPromotion == null
-            ? _defaultPromotionDialog(position)
-            : widget.onPromotion!(position);
-      }
+  @override
+  void initState() {
+    if (widget.spectateInitially) {
+      widget.arbiter.spectateForGameEnd(widget.game); // handler for game over
     }
-  }
 
-  void _defaultPromotionDialog(Position position) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Promote Pawn"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var type in [
-                  PieceType.queen,
-                  PieceType.rook,
-                  PieceType.bishop,
-                  PieceType.knight,
-                ])
-                  ListTile(
-                    title: Text(type.toString().split('.').last),
-                    onTap: () {
-                      widget.game.promotePawn(position, type);
-                      Navigator.of(context).pop();
-                      setState(() {});
-                    },
-                  ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  void _defaultCheckmateDialog(PieceColor turn) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Game Over"),
-            content: Text(
-              turn == PieceColor.white ? "Black wins!" : "White wins!",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  widget.game.reset();
-                  setState(() {});
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Restart"),
-              ),
-            ],
-          ),
-    );
+    widget.arbiter.timerSpectator(widget.game); // timeout handler
+    super.initState();
   }
 
   @override
@@ -158,7 +114,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
           ChessPiece? piece = widget.game.getPiece(pos);
 
           return GestureDetector(
-            onTap: () => onSquareTap(row, col),
+            onTap: () => _onSquareTap(row, col),
             child: Container(
               decoration: BoxDecoration(
                 color:

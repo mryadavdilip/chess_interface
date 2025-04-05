@@ -1,3 +1,4 @@
+import 'package:chess_interface/arbiter/arbiter.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:flutter/material.dart';
 // import 'package:share_plus/share_plus.dart';
@@ -50,6 +51,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           ChessBoardWidget(
             game: game,
+            arbiter: Arbiter(),
             boardSize: 300,
             config: BoardThemeConfig(),
           ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'move_validator.dart';
 import 'piece.dart';
 
@@ -20,14 +21,20 @@ class Position {
 }
 
 class ChessBoardInterface {
-  List<List<ChessPiece?>> board = List.generate(8, (_) => List.filled(8, null));
+  List<List<ChessPiece?>> get _emptyBoard =>
+      List.generate(8, (_) => List.filled(8, null));
+
   final String? fen;
+  final Duration? timeLimit; // Optional time limit for the game
+
   // Adjust the initial state FEN so that the first rank (board[0]) corresponds
   // to the first row in the FEN and the last rank (board[7]) corresponds to the last row.
   // For example, if you want white pieces at the bottom (board[0]), then your FEN might look like:
   // 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'
-  final String initialState =
+  final String initialFENState =
       'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+  List<List<ChessPiece?>> board = []; // Being initialized in initFEN
 
   PieceColor turn = PieceColor.white;
 
@@ -39,99 +46,36 @@ class ChessBoardInterface {
   int halfMoveClock = 0; // Halfmove clock for draw conditions
   int fullMoveNumber = 1; // Fullmove number for draw conditions
 
-  ChessBoardInterface({this.fen}) {
-    initFEN(fen ?? initialState);
+  bool isDraw = false; // Flag for draw by consent
+  PieceColor? resign; // Resignation color
+
+  final Stopwatch _stopwatchWhite = Stopwatch(); // not for use
+  final Stopwatch _stopwatchBlack = Stopwatch(); // not for use
+
+  int get _whiteRemainingTime =>
+      (timeLimit?.inMilliseconds ?? 0) - _stopwatchWhite.elapsedMilliseconds;
+  int get _blackRemainingTime =>
+      (timeLimit?.inMilliseconds ?? 0) - _stopwatchBlack.elapsedMilliseconds;
+
+  Timer? _timer; // not for use
+  final _whiteTimeController = StreamController<int>.broadcast();
+  final _blackTimeController = StreamController<int>.broadcast();
+
+  /// countdown timers to listen times for both players
+  Stream<int> get whiteTimeStream => _whiteTimeController.stream;
+  Stream<int> get blackTimeStream => _blackTimeController.stream;
+
+  ChessBoardInterface({this.fen, this.timeLimit}) {
+    initFEN(fen ?? initialFENState);
+    if (timeLimit != null) switchTimer();
   }
 
-  void initFEN(String fen) {
-    board = List.generate(8, (_) => List.filled(8, null));
-
-    List<String> parts = fen.split(" ");
-    List<String> rows = parts[0].split("/");
-
-    // Determine turn from FEN.
-    turn = (parts[1] == "w") ? PieceColor.white : PieceColor.black;
-
-    // En-passant target square (if any).
-    if (parts[3] != "-") {
-      String targetSquare = parts[3];
-      int col = targetSquare.codeUnitAt(0) - 'a'.codeUnitAt(0);
-      int row = 8 - int.parse(targetSquare[1]);
-      enPassantTarget = Position(row: row, col: col);
-    } else {
-      enPassantTarget = null;
-    }
-
-    halfMoveClock = int.tryParse(parts[4]) ?? 0; // Halfmove clock from FEN
-    fullMoveNumber = int.tryParse(parts[5]) ?? 1; // Fullmove number from FEN
-
-    // Here we assume the FEN rows correspond directly to board rows (0 to 7).
-    for (int row = 0; row < 8; row++) {
-      int col = 0;
-      String fenRow = rows[row]; // no reversal
-      for (int i = 0; i < fenRow.length; i++) {
-        String charAt = fenRow[i];
-        if (RegExp(r'[1-8]').hasMatch(charAt)) {
-          col += int.parse(charAt);
-        } else {
-          board[row][col] = _getPieceFromChar(charAt);
-          col++;
-        }
-      }
-    }
+  void setDraw(bool draw) {
+    isDraw = draw;
   }
 
-  void reset() {
-    board = List.generate(8, (_) => List.filled(8, null));
-    initFEN(initialState);
-    history.clear();
-    redoHistory.clear();
-  }
-
-  String toFEN() {
-    StringBuffer fenBuffer = StringBuffer();
-    // Piece placement
-    for (int row = 0; row < 8; row++) {
-      int emptyCount = 0;
-      for (int col = 0; col < 8; col++) {
-        ChessPiece? piece = board[row][col];
-        if (piece == null) {
-          emptyCount++;
-        } else {
-          if (emptyCount > 0) {
-            fenBuffer.write(emptyCount);
-            emptyCount = 0;
-          }
-          fenBuffer.write(_getPieceChar(piece));
-        }
-      }
-      if (emptyCount > 0) fenBuffer.write(emptyCount);
-      if (row < 7) fenBuffer.write("/");
-    }
-
-    // Active color (turn)
-    fenBuffer.write(" ");
-    fenBuffer.write(turn == PieceColor.white ? "w" : "b");
-
-    // Castling availability
-    fenBuffer.write(" ");
-    fenBuffer.write(getCastlingRights());
-
-    // En passant target square (using "-" as default, modify if you have one)
-    fenBuffer.write(" ");
-    fenBuffer.write(
-      enPassantTarget != null
-          ? "${String.fromCharCode('a'.codeUnitAt(0) + enPassantTarget!.col)}${8 - enPassantTarget!.row}"
-          : "-",
-    );
-
-    // Halfmove clock and fullmove number (defaults here)
-    fenBuffer.write(" ");
-    fenBuffer.write(halfMoveClock);
-    fenBuffer.write(" ");
-    fenBuffer.write(fullMoveNumber);
-
-    return fenBuffer.toString();
+  void setResign(PieceColor color) {
+    resign = color;
   }
 
   /// Moves a piece on the board without validation.
@@ -146,7 +90,7 @@ class ChessBoardInterface {
     return true;
   }
 
-  static String _getPieceChar(ChessPiece piece) {
+  static String getPieceChar(ChessPiece piece) {
     Map<PieceType, String> whitePieces = {
       PieceType.pawn: "P",
       PieceType.knight: "N",
@@ -168,7 +112,7 @@ class ChessBoardInterface {
         : blackPieces[piece.type])!;
   }
 
-  static ChessPiece _getPieceFromChar(String char) {
+  static ChessPiece getPieceFromChar(String char) {
     Map<String, ChessPiece> pieceMap = {
       "P": ChessPiece(type: PieceType.pawn, color: PieceColor.white),
       "N": ChessPiece(type: PieceType.knight, color: PieceColor.white),
@@ -213,6 +157,16 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
   // int countPieces(String row) {
   //   return row.replaceAll(RegExp(r'[^KQRBNPkpqrbnp]'), '').length;
   // }
+
+  bool isEligibleForPromotion(Position position) {
+    ChessPiece? piece = getPiece(position);
+    if (piece?.type == PieceType.pawn) {
+      if (position.row == 0 || position.row == 7) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   bool isKingInCheck() {
     int kingRow = -1, kingCol = -1;
@@ -308,6 +262,100 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return !isKingInCheck();
   }
 
+  bool isInsufficientMaterial() {
+    List<ChessPiece> remainingPieces = [];
+
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        ChessPiece? piece = getPiece(Position(row: row, col: col));
+        if (piece != null) {
+          remainingPieces.add(piece);
+        }
+      }
+    }
+
+    // Only kings left
+    if (remainingPieces.length == 2) {
+      return remainingPieces.every((p) => p.type == PieceType.king);
+    }
+
+    // King and bishop or knight vs king
+    if (remainingPieces.length == 3) {
+      bool hasOneMinor =
+          remainingPieces
+              .where(
+                (p) => p.type == PieceType.bishop || p.type == PieceType.knight,
+              )
+              .length ==
+          1;
+      return hasOneMinor;
+    }
+
+    // King and bishop vs king and bishop (same color bishops)
+    if (remainingPieces.length == 4) {
+      List<ChessPiece> bishops =
+          remainingPieces.where((p) => p.type == PieceType.bishop).toList();
+
+      if (bishops.length == 2) {
+        // Get their positions to compare bishop square colors
+        List<Position> positions = [];
+
+        for (int row = 0; row < 8; row++) {
+          for (int col = 0; col < 8; col++) {
+            ChessPiece? piece = getPiece(Position(row: row, col: col));
+            if (piece != null && piece.type == PieceType.bishop) {
+              positions.add(Position(row: row, col: col));
+            }
+          }
+        }
+
+        if (positions.length == 2) {
+          bool sameColorSquares =
+              (positions[0].row + positions[0].col) % 2 ==
+              (positions[1].row + positions[1].col) % 2;
+          return sameColorSquares;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool isThreefoldRepetition() {
+    String stripIrrelevantFENParts(String fen) {
+      // FEN format: piece_positions active_color castling_avail en_passant halfmove fullmove
+      List<String> parts = fen.split(' ');
+      if (parts.length < 4) return fen;
+
+      // Keep only parts 0 to 3: board, turn, castling rights, en passant
+      return '${parts[0]} ${parts[1]} ${parts[2]} ${parts[3]}';
+    }
+
+    Map<String, int> repetitionCount = {};
+
+    for (String fen in history) {
+      // Remove move clocks and turn data to avoid false negatives
+      String key = stripIrrelevantFENParts(fen);
+
+      repetitionCount[key] = (repetitionCount[key] ?? 0) + 1;
+
+      if (repetitionCount[key]! >= 3) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool isFiftyMoveDraw() {
+    // Check if the half-move clock has reached 50
+    return halfMoveClock >= 100;
+  }
+
+  bool isTimeOut() {
+    return _blackRemainingTime <= 0 || _whiteRemainingTime <= 0;
+  }
+
   List<Position> getValidMoves(Position from) {
     ChessPiece? piece = getPiece(from);
     if (piece == null || piece.color != turn) return [];
@@ -388,6 +436,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
   // Switch turn to the opposite color.
   void switchTurn() {
     turn = (turn == PieceColor.white) ? PieceColor.black : PieceColor.white;
+    switchTimer();
   }
 
   ChessPiece? getPiece(Position position) {
@@ -477,6 +526,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
 
     // Switch turn after a successful move.
     switchTurn();
+
     // Clear redo history.
     redoHistory.clear();
 
@@ -540,7 +590,7 @@ extension LastMoveGetter on ChessBoardInterface {
         if (RegExp(r'[1-8]').hasMatch(charAt)) {
           col += int.parse(charAt);
         } else {
-          board[row][col] = ChessBoardInterface._getPieceFromChar(charAt);
+          board[row][col] = ChessBoardInterface.getPieceFromChar(charAt);
           col++;
         }
       }
@@ -549,7 +599,128 @@ extension LastMoveGetter on ChessBoardInterface {
   }
 }
 
-extension DeepCopy on ChessBoardInterface {
+extension BoardUtils on ChessBoardInterface {
+  void initFEN(String fen) {
+    board = _emptyBoard;
+
+    List<String> parts = fen.split(" ");
+    List<String> rows = parts[0].split("/");
+
+    // Determine turn from FEN.
+    turn = (parts[1] == "w") ? PieceColor.white : PieceColor.black;
+
+    // En-passant target square (if any).
+    if (parts[3] != "-") {
+      String targetSquare = parts[3];
+      int col = targetSquare.codeUnitAt(0) - 'a'.codeUnitAt(0);
+      int row = 8 - int.parse(targetSquare[1]);
+      enPassantTarget = Position(row: row, col: col);
+    } else {
+      enPassantTarget = null;
+    }
+
+    halfMoveClock = int.tryParse(parts[4]) ?? 0; // Halfmove clock from FEN
+    fullMoveNumber = int.tryParse(parts[5]) ?? 1; // Fullmove number from FEN
+
+    // Here we assume the FEN rows correspond directly to board rows (0 to 7).
+    for (int row = 0; row < 8; row++) {
+      int col = 0;
+      String fenRow = rows[row]; // no reversal
+      for (int i = 0; i < fenRow.length; i++) {
+        String charAt = fenRow[i];
+        if (RegExp(r'[1-8]').hasMatch(charAt)) {
+          col += int.parse(charAt);
+        } else {
+          board[row][col] = ChessBoardInterface.getPieceFromChar(charAt);
+          col++;
+        }
+      }
+    }
+  }
+
+  String toFEN() {
+    StringBuffer fenBuffer = StringBuffer();
+    // Piece placement
+    for (int row = 0; row < 8; row++) {
+      int emptyCount = 0;
+      for (int col = 0; col < 8; col++) {
+        ChessPiece? piece = board[row][col];
+        if (piece == null) {
+          emptyCount++;
+        } else {
+          if (emptyCount > 0) {
+            fenBuffer.write(emptyCount);
+            emptyCount = 0;
+          }
+          fenBuffer.write(ChessBoardInterface.getPieceChar(piece));
+        }
+      }
+      if (emptyCount > 0) fenBuffer.write(emptyCount);
+      if (row < 7) fenBuffer.write("/");
+    }
+
+    // Active color (turn)
+    fenBuffer.write(" ");
+    fenBuffer.write(turn == PieceColor.white ? "w" : "b");
+
+    // Castling availability
+    fenBuffer.write(" ");
+    fenBuffer.write(getCastlingRights());
+
+    // En passant target square (using "-" as default, modify if you have one)
+    fenBuffer.write(" ");
+    fenBuffer.write(
+      enPassantTarget != null
+          ? "${String.fromCharCode('a'.codeUnitAt(0) + enPassantTarget!.col)}${8 - enPassantTarget!.row}"
+          : "-",
+    );
+
+    // Halfmove clock and fullmove number (defaults here)
+    fenBuffer.write(" ");
+    fenBuffer.write(halfMoveClock);
+    fenBuffer.write(" ");
+    fenBuffer.write(fullMoveNumber);
+
+    return fenBuffer.toString();
+  }
+
+  void switchTimer({bool stop = false}) {
+    _timer?.cancel();
+    if (stop) {
+      _stopwatchWhite.stop();
+      _stopwatchBlack.stop();
+      _timer?.cancel();
+    } else if (turn == PieceColor.white) {
+      _stopwatchWhite.start();
+      _stopwatchBlack.stop();
+
+      /// adjust duration according to your clock speed
+      _timer = Timer.periodic(Duration(milliseconds: 100), (_) {
+        _whiteTimeController.add(_whiteRemainingTime);
+      });
+    } else if (turn == PieceColor.black) {
+      _stopwatchBlack.start();
+      _stopwatchWhite.stop();
+
+      /// adjust duration according to your clock speed
+      _timer = Timer.periodic(Duration(milliseconds: 100), (_) {
+        _blackTimeController.add(_blackRemainingTime);
+      });
+    }
+  }
+
+  void reset() {
+    board = _emptyBoard;
+    initFEN(initialFENState);
+    isDraw = false;
+    resign = null;
+    _stopwatchWhite.reset();
+    _stopwatchBlack.reset();
+    _timer?.cancel();
+    history.clear();
+    redoHistory.clear();
+  }
+
   ChessBoardInterface deepCopy() {
     ChessBoardInterface newBoard = ChessBoardInterface(fen: fen);
     for (int row = 0; row < 8; row++) {
