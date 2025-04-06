@@ -7,3 +7,7 @@
 ## 1.0.1
 
 * Added Arbiter class for promotion handler, game over handler and timeoute handler.
+
+## 1.0.2
+
+* Documentation

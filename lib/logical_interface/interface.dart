@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:chess_interface/chess_board_widget.dart';
+
 import 'move_validator.dart';
 import 'piece.dart';
 
@@ -27,27 +29,37 @@ class ChessBoardInterface {
   final String? fen;
   final Duration? timeLimit; // Optional time limit for the game
 
-  // Adjust the initial state FEN so that the first rank (board[0]) corresponds
-  // to the first row in the FEN and the last rank (board[7]) corresponds to the last row.
-  // For example, if you want white pieces at the bottom (board[0]), then your FEN might look like:
-  // 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'
-  final String initialFENState =
+  /// Adjust the initial state FEN so that the first rank ([board].[0]) corresponds
+  /// to the first row in the FEN and the last rank ([board].[7]) corresponds to the last row.
+  /// For example, if you want white pieces at the bottom ([board].[0]), then your FEN might look like:
+  /// 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'
+  String initialFENState =
       'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   List<List<ChessPiece?>> board = []; // Being initialized in initFEN
 
   PieceColor turn = PieceColor.white;
 
-  List<String> history = []; // Stores previous FEN states for undo
-  List<String> redoHistory = []; // Stores undone moves for redo
+  /// Useful for generating PGN and other custom formats. Stores previous FEN states for operations like undo and more
+  List<String> history = [];
 
+  /// Stores undone moves for redo
+  List<String> redoHistory = [];
+
+  /// En passant target [Position] (if any)
   Position? enPassantTarget;
 
-  int halfMoveClock = 0; // Halfmove clock for draw conditions
-  int fullMoveNumber = 1; // Fullmove number for draw conditions
+  /// Halfmove clock for draw conditions
+  int halfMoveClock = 0;
 
-  bool isDraw = false; // Flag for draw by consent
-  PieceColor? resign; // Resignation color
+  /// Fullmove number for draw conditions
+  int fullMoveNumber = 1;
+
+  /// Flag for draw by consent
+  bool isDraw = false;
+
+  /// Register resignation. (Player who resigned)
+  PieceColor? resign;
 
   final Stopwatch _stopwatchWhite = Stopwatch(); // not for use
   final Stopwatch _stopwatchBlack = Stopwatch(); // not for use
@@ -61,7 +73,7 @@ class ChessBoardInterface {
   final _whiteTimeController = StreamController<int>.broadcast();
   final _blackTimeController = StreamController<int>.broadcast();
 
-  /// countdown timers to listen times for both players
+  /// countdown timers to listen times for both the players
   Stream<int> get whiteTimeStream => _whiteTimeController.stream;
   Stream<int> get blackTimeStream => _blackTimeController.stream;
 
@@ -158,6 +170,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
   //   return row.replaceAll(RegExp(r'[^KQRBNPkpqrbnp]'), '').length;
   // }
 
+  /// Checks if a piece is eligible for promotion.
   bool isEligibleForPromotion(Position position) {
     ChessPiece? piece = getPiece(position);
     if (piece?.type == PieceType.pawn) {
@@ -168,6 +181,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return false;
   }
 
+  /// Checks if the king is in check.
   bool isKingInCheck() {
     int kingRow = -1, kingCol = -1;
 
@@ -203,6 +217,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return false;
   }
 
+  /// Checks if the game is in a checkmate state. [turn] is the player loses the game
   bool isCheckmate() {
     if (!isKingInCheck()) return false;
 
@@ -241,6 +256,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return true;
   }
 
+  /// Checks if the game is in a stalemate state.
   bool isStalemate() {
     for (int fromRow = 0; fromRow < 8; fromRow++) {
       for (int fromCol = 0; fromCol < 8; fromCol++) {
@@ -262,6 +278,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return !isKingInCheck();
   }
 
+  /// Checks if the game is in a draw state due to insufficient material.
   bool isInsufficientMaterial() {
     List<ChessPiece> remainingPieces = [];
 
@@ -321,6 +338,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return false;
   }
 
+  /// Checks if the game is in a draw state due to threefold repetition.
   bool isThreefoldRepetition() {
     String stripIrrelevantFENParts(String fen) {
       // FEN format: piece_positions active_color castling_avail en_passant halfmove fullmove
@@ -347,15 +365,18 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return false;
   }
 
+  /// Checks if the game is in a draw state due to the fifty-move rule.
   bool isFiftyMoveDraw() {
     // Check if the half-move clock has reached 50
     return halfMoveClock >= 100;
   }
 
+  /// Checks if the game is in time out. [turn] is the player loses the game
   bool isTimeOut() {
     return _blackRemainingTime <= 0 || _whiteRemainingTime <= 0;
   }
 
+  /// Returns a list of valid moves for the selected piece, to render in the [ChessBoardWidget].
   List<Position> getValidMoves(Position from) {
     ChessPiece? piece = getPiece(from);
     if (piece == null || piece.color != turn) return [];
@@ -388,6 +409,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     return validMoves;
   }
 
+  /// Promotes [PieceType.pawn] to the specified [type].
   void promotePawn(Position position, PieceType type) {
     ChessPiece? piece = getPiece(position);
     // Ensure the piece is a pawn on the final rank.
@@ -404,9 +426,13 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     );
   }
 
+  /// Check if user can undo the last move.
   bool canUndo() => history.isNotEmpty;
+
+  /// Check if user can redo the last undone move.
   bool canRedo() => redoHistory.isNotEmpty;
 
+  /// Undo the last move and restore the previous state.
   void undo() {
     if (history.isNotEmpty) {
       String currentFEN = toFEN();
@@ -421,6 +447,7 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     }
   }
 
+  /// Redo the last undone move and restore the forth state.
   void redo() {
     if (redoHistory.isNotEmpty) {
       String currentFEN = toFEN();
@@ -433,16 +460,18 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
     }
   }
 
-  // Switch turn to the opposite color.
+  /// Switch [turn] to the opposite [ChessPiece.color] / player.
   void switchTurn() {
     turn = (turn == PieceColor.white) ? PieceColor.black : PieceColor.white;
     switchTimer();
   }
 
+  /// Get the piece at the specified position.
   ChessPiece? getPiece(Position position) {
     return board[position.row][position.col];
   }
 
+  /// Move a piece from one position to another, with complete validations.
   bool move(Position from, Position to) {
     ChessPiece? piece = getPiece(from);
     if (piece == null || piece.color != turn) {
@@ -535,8 +564,8 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
 }
 
 extension LastMoveGetter on ChessBoardInterface {
-  // Returns the position from which a piece was moved,
-  // deduced by comparing the second last and last FEN strings.
+  /// Returns the [Position] from which a [ChessPiece] was moved,
+  /// deduced by comparing the second last and last FEN strings.
   Position? get lastMoveFrom {
     if (history.length < 2) return null;
     String previousFen = history[history.length - 2];
@@ -555,8 +584,8 @@ extension LastMoveGetter on ChessBoardInterface {
     return null;
   }
 
-  // Returns the destination square where a piece was moved,
-  // deduced by comparing the second last and last FEN strings.
+  /// Returns the "to [Position] square" where a [ChessPiece] was moved,
+  /// deduced by comparing the second last and last FEN strings.
   Position? get lastMoveTo {
     if (history.length < 2) return null;
     String previousFen = history[history.length - 2];
@@ -600,6 +629,7 @@ extension LastMoveGetter on ChessBoardInterface {
 }
 
 extension BoardUtils on ChessBoardInterface {
+  /// initializes the board with the given FEN string.
   void initFEN(String fen) {
     board = _emptyBoard;
 
@@ -709,6 +739,7 @@ extension BoardUtils on ChessBoardInterface {
     }
   }
 
+  /// Resets the board to its [initialFENState].
   void reset() {
     board = _emptyBoard;
     initFEN(initialFENState);
@@ -721,6 +752,7 @@ extension BoardUtils on ChessBoardInterface {
     redoHistory.clear();
   }
 
+  /// Returns a deep copy of the current [ChessBoardInterface] instance.
   ChessBoardInterface deepCopy() {
     ChessBoardInterface newBoard = ChessBoardInterface(fen: fen);
     for (int row = 0; row < 8; row++) {

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:chess_interface/env.dart';
 
+/// This class is used to store the board theme configuration
+/// It contains the [boardColor] and the [materialVariety] (should be available in this package's assets)
 class BoardThemeConfig {
   Color? boardColor;
-  String? materialVarity;
-  BoardThemeConfig({this.boardColor, this.materialVarity}) {
+  String? materialVariety;
+  BoardThemeConfig({this.boardColor, this.materialVariety}) {
     boardColor ??= boardColors.first;
-    materialVarity ??= materialsResources.keys.first;
+    materialVariety ??= materialsResources.keys.first;
   }
 
   factory BoardThemeConfig.fromMap(Map<String, dynamic> map) =>
@@ -14,11 +16,12 @@ class BoardThemeConfig {
         boardColor: Color(
           map['boardColor'] as int? ?? boardColors.first.toARGB32(),
         ),
-        materialVarity: map['materialVarity'] ?? materialsResources.keys.first,
+        materialVariety:
+            map['materialVariety'] ?? materialsResources.keys.first,
       );
 
   Map<String, dynamic> toMap() => {
     'boardColor': boardColor?.toARGB32(),
-    'materialVarity': materialVarity,
+    'materialVariety': materialVariety,
   };
 }

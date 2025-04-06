@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chess_interface/chess_board_widget.dart';
 import 'package:chess_interface/logical_interface/interface.dart';
 import 'package:chess_interface/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,9 @@ class Arbiter {
     this.context,
   });
 
-  void timerSpectator(game) {
+  /// countdown for player time, if [game] has [timeLimit]
+  /// is being used in [ChessBoardWidget] to start [countdownSpectator] when widget is created
+  void countdownSpectator(game) {
     StreamSubscription<int>? whiteTimeSubscription;
     StreamSubscription<int>? blackTimeSubscription;
 
@@ -60,7 +63,7 @@ class Arbiter {
     }
   }
 
-  /// returns isPromoted
+  /// returns if player chose a piece (isPromoted)
   Future<bool> promotionCheck(
     ChessBoardInterface game,
     Position position,
@@ -75,6 +78,7 @@ class Arbiter {
     return false;
   }
 
+  /// returns if game is over (isReset)
   Future<bool> spectateForGameEnd(ChessBoardInterface game) async {
     GameOverBy? gameOverBy;
 

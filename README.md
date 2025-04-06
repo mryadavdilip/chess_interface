@@ -28,7 +28,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.1
+  chess_interface: ^1.0.2
 ```
 
 Then import these:
@@ -60,7 +60,7 @@ ChessBoardWidget(
   
   boardTheme: BoardThemeConfig(
     boardColor: Colors.brown[300],
-    materialVarity: 'modern_minimalist', // or check for materialResources.keys in env.dart
+    materialVariety: 'modern_minimalist', // or check for materialResources.keys in env.dart
   ),
 );
 ```
@@ -74,7 +74,7 @@ Customize the board and pieces using `BoardThemeConfig`. You can define your own
 ```dart
 BoardThemeConfig(
   boardColor: Colors.green[700],
-  materialVarity: 'wooden',
+  materialVariety: 'wooden',
 );
 ```
 
@@ -130,8 +130,7 @@ flutter:
 ```
 
 ## Contributing
-
-Contributions are welcome! Please open issues and pull requests to help improve this package.
+Contributions are welcome! Please open issues and pull requests to help improve this [![Package]](https://www.github.com/mryadavdilip/chess_interface.git).
 
 ## License
 

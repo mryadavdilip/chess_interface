@@ -87,7 +87,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
       widget.arbiter.spectateForGameEnd(widget.game); // handler for game over
     }
 
-    widget.arbiter.timerSpectator(widget.game); // timeout handler
+    widget.arbiter.countdownSpectator(widget.game); // timeout handler
     super.initState();
   }
 
@@ -153,7 +153,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
                     ),
                   FutureBuilder(
                     key: ValueKey('$row-$col-${piece?.type}'),
-                    future: piece?.getResource(widget.config.materialVarity!),
+                    future: piece?.getResource(widget.config.materialVariety!),
                     builder: (context, ss) {
                       return Padding(
                         padding: EdgeInsets.all(
