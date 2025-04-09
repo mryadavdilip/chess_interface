@@ -1,7 +1,7 @@
 name: chess_interface
 description: "A chess interface for the chess engine with all basic functionalities like move, undo, redo, etc. and a chess board widget with custom themes."
 version: 1.0.3
-homepage: https://www.github.com/mryadavdilip/chess_interface
+homepage: https://www.github.com/mryadavdilip/chess_interface.git
 
 environment:
   sdk: ^3.7.0
