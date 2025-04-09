@@ -17,7 +17,7 @@ enum GameOverBy {
 }
 
 class Arbiter {
-  /// show your custom dialog or handle your code when pawn promotion is needed, it must return true/false to check and update state if pawn is promoted or not
+  /// It should be used to show the promotion dialog when a pawn reaches the last rank, or pawn on the last rank is tapped. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn.
   final Future<bool> Function(Position position)? onPromotion;
 
   /// callback when game is over. must return true/false to check and update state if game is reset or not

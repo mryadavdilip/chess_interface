@@ -15,12 +15,6 @@ class ChessBoardWidget extends StatefulWidget {
   /// This is useful for testing purposes or if you want to handle game logic manually.
   final bool spectateInitially;
 
-  /// It should be used to show the promotion dialog when a pawn reaches the last rank, or pawn on the last rank is tapped. Use [game].promotePawn([Position], [PieceType]) to promote the pawn.
-  final ValueChanged<Position>? onPromotion;
-
-  /// [PieceColor] of the player who is in checkmate (losing)
-  final ValueChanged<PieceColor>? onCheckmate;
-
   // Define board size using ScreenUtil for responsive design
   final double boardSize;
 
@@ -30,8 +24,6 @@ class ChessBoardWidget extends StatefulWidget {
     required this.game,
     required this.arbiter,
     this.spectateInitially = true,
-    this.onPromotion,
-    this.onCheckmate,
     required this.boardSize,
     required this.config,
   });
