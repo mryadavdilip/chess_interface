@@ -1,6 +1,6 @@
 name: chess_interface
 description: "A chess interface for the chess engine with all basic functionalities like move, undo, redo, etc. and a chess board widget with custom themes."
-version: 1.0.2
+version: 1.0.3
 homepage: https://www.github.com/mryadavdilip/chess_interface
 
 environment:
@@ -26,5 +26,5 @@ flutter:
   # To add assets to your package, add an assets section, like this:
   assets:
     - assets/
-    - assets/modern_minimalist
-    - assets/silhoutte_minimalist
+    - assets/modern_minimalist/
+    - assets/silhoutte_minimalist/

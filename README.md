@@ -28,7 +28,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.2
+  chess_interface: ^1.0.3
 ```
 
 Then import these:
@@ -130,7 +130,7 @@ flutter:
 ```
 
 ## Contributing
-Contributions are welcome! Please open issues and pull requests to help improve this [![Package]](https://www.github.com/mryadavdilip/chess_interface.git).
+Contributions are welcome! Please open issues and pull requests to help improve this [Package](https://www.github.com/mryadavdilip/chess_interface.git).
 
 ## License
 
