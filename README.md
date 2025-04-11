@@ -3,6 +3,8 @@
 
 # chess_interface
 
+This is a flutter package and doesn't <u>pure dart based project</u>. For dart / backend project, checkout [chess_interface_dart](https://www.pub.dev/packages/chess_interface_dart) Package.
+
 A customizable, feature-rich chess board widget built in Flutter. This package offers a robust foundation for integrating chess gameplay into your Flutter apps — complete with piece rendering, move validation, theming, and more.
 
 ## Features
@@ -28,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.5
+  chess_interface: ^1.0.6
 ```
 
 Then import these:

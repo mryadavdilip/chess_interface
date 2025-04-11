@@ -15,3 +15,7 @@
 ## 1.0.3
 
 * Removed unnecessary parameters from ChessBoardWidget
+
+## 1.0.6
+
+* Reference to dart package for back-end integration
