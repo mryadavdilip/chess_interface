@@ -28,7 +28,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.3
+  chess_interface: ^1.0.4
 ```
 
 Then import these:
@@ -112,7 +112,7 @@ Arbiter to handle events like game over, time out and pawn promotion:
 - `chess_board_widget.dart` – Main UI and logic
 - `move_validator.dart` – Move legality checker
 - `piece.dart` – Piece model and asset loader
-- `arbiter.dart` – Game over, timOut, and promotion handler
+- `arbiter.dart` – Game over, timeOut, and promotion handler
 - `board_theme_config.dart` – Customization config
 - `color_extension.dart` – Color manipulation utilities
 - `interface.dart` – Board interaction interface

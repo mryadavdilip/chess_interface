@@ -11,3 +11,7 @@
 ## 1.0.2
 
 * Documentation
+
+## 1.0.3
+
+* Removed unnecessary parameters from ChessBoardWidget
