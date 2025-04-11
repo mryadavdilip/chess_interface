@@ -373,7 +373,8 @@ extension ChessBoardInterfaceExtension on ChessBoardInterface {
 
   /// Checks if the game is in time out. [turn] is the player loses the game
   bool isTimeOut() {
-    return _blackRemainingTime <= 0 || _whiteRemainingTime <= 0;
+    return timeLimit != null &&
+        (_blackRemainingTime <= 0 || _whiteRemainingTime <= 0);
   }
 
   /// Returns a list of valid moves for the selected piece, to render in the [ChessBoardWidget].

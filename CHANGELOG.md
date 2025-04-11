@@ -19,3 +19,7 @@
 ## 1.0.6
 
 * Reference to dart package for back-end integration
+
+## 1.0.7
+
+* Fixed isTimeOut() method
