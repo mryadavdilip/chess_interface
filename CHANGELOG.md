@@ -23,3 +23,7 @@
 ## 1.0.7
 
 * Fixed isTimeOut() method
+
+## 1.0.8
+
+* Fixed assets loading issue

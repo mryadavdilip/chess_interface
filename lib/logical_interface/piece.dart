@@ -24,7 +24,7 @@ extension ChessPieceExtension on ChessPiece {
     bool sameFolderForBothColors =
         materialsResources[materialVariety] is List<String>;
     String path =
-        'assets/$materialVariety/${sameFolderForBothColors ? '' : '${color.name}/'}${type.name}.png';
+        'packages/chess_interface/assets/$materialVariety/${sameFolderForBothColors ? '' : '${color.name}/'}${type.name}.png';
 
     return Image.asset(
       path,

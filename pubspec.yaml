@@ -1,6 +1,6 @@
 name: chess_interface
 description: "A chess interface for the chess engine with all basic functionalities like move, undo, redo, etc. and a chess board widget with custom themes."
-version: 1.0.7
+version: 1.0.8
 homepage: https://www.github.com/mryadavdilip/chess_interface.git
 
 environment:
@@ -28,3 +28,5 @@ flutter:
     - assets/
     - assets/modern_minimalist/
     - assets/silhoutte_minimalist/
+    - assets/silhoutte_minimalist/black/
+    - assets/silhoutte_minimalist/white/
