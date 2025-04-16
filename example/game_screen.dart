@@ -1,4 +1,6 @@
 import 'package:chess_interface/arbiter/arbiter.dart';
+import 'package:chess_interface/env.dart';
+import 'package:chess_interface/logical_interface/piece.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:flutter/material.dart';
 // import 'package:share_plus/share_plus.dart';
@@ -51,9 +53,33 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           ChessBoardWidget(
             game: game,
-            arbiter: Arbiter(),
+            // optional
+            onMove: (Position from, Position to) {},
+            // optional
+            playAs: PieceColor.black,
+
+            // false by default
+            rotateBoard: true,
+            arbiter: Arbiter(
+              context: context,
+              onGameOver: (gameOverBy) async {
+                // handle gameover
+                return true;
+              },
+              onPromotion: (position) async {
+                // handle promotion
+                return true;
+              },
+            ),
+            // true by default
+            spectateInitially: false,
             boardSize: 300,
-            config: BoardThemeConfig(),
+            config: BoardThemeConfig(
+              boardColor: Colors.limeAccent,
+
+              /// To add your own resources, refer to the assets folder structure inside this package. If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces. If you've simple and fillable png recourses, simply add them in "assets/your_materials_name/bishop.png" path.
+              materialVariety: materialsResources.keys.first,
+            ),
           ),
           SizedBox(height: 20),
           Row(

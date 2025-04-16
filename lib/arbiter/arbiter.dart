@@ -17,16 +17,16 @@ enum GameOverBy {
 }
 
 class Arbiter {
-  /// It should be used to show the promotion dialog when a pawn reaches the last rank, or pawn on the last rank is tapped. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn.
+  /// _defaultPromotionDialog is shown if this field is null and [showDialogs] is true. Callback is made when a pawn reaches the promotion rank. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn and return the promotion status either true or false.
   final Future<bool> Function(Position position)? onPromotion;
 
-  /// callback when game is over. must return true/false to check and update state if game is reset or not
+  /// Callback when game is over. must return true/false to check and update state if game is reset or not
   final Future<bool> Function(GameOverBy)? onGameOver;
 
   /// true by default, show dialogs when arbiter detects a state
   final bool showDialogs;
 
-  /// required context to show dialogs, if [showDialogs] is true
+  /// Required context to show dialogs, if [showDialogs] is true
   final BuildContext? context;
 
   Arbiter({
@@ -36,9 +36,9 @@ class Arbiter {
     this.context,
   });
 
-  /// countdown for player time, if [game] has [timeLimit]
-  /// is being used in [ChessBoardWidget] to start [countdownSpectator] when widget is created
-  void countdownSpectator(game) {
+  /// Countdown for player time, if [game] has [timeLimit].
+  /// It is being used in [ChessBoardWidget] to start [countdownSpectator] when widget is created
+  void countdownSpectator(ChessBoardInterface game) {
     StreamSubscription<int>? whiteTimeSubscription;
     StreamSubscription<int>? blackTimeSubscription;
 
@@ -63,7 +63,7 @@ class Arbiter {
     }
   }
 
-  /// returns if player chose a piece (isPromoted)
+  /// Returns true if player chose a piece (isPromoted)
   Future<bool> promotionCheck(
     ChessBoardInterface game,
     Position position,
@@ -120,6 +120,7 @@ class Arbiter {
 
     await showDialog(
       context: context!,
+      barrierDismissible: false,
       builder:
           (context) => AlertDialog(
             title: const Text("Promote Pawn"),
@@ -144,6 +145,11 @@ class Arbiter {
             ),
           ),
     );
+
+    if (!isPromoted) {
+      game.promotePawn(position, PieceType.queen);
+      isPromoted = true;
+    }
 
     return isPromoted;
   }
