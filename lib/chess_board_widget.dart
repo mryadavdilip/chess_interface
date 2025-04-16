@@ -109,7 +109,8 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
 
     return Transform.rotate(
       angle:
-          (widget.rotateBoard && widget.game.turn == PieceColor.black)
+          (widget.rotateBoard && widget.game.turn == PieceColor.black) ||
+                  widget.playAs == PieceColor.black
               ? pi
               : 0, // pi for 180 degree rotation
       child: SizedBox(

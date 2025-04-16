@@ -30,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.0.9
+  chess_interface: ^1.1.0
 ```
 
 Then import these:

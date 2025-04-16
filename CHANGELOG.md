@@ -28,6 +28,6 @@
 
 * Fixed assets loading issue
 
-## 1.0.9
+## 1.1.0
 
 * Added logic for optional fields 'playAs', 'onMove' and 'rotateBoard' in ChessBoardWidget, and promotion handling safety
