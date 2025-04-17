@@ -19,7 +19,7 @@ ChessBoardInterface game = ChessBoardInterface(
 Arbiter arbiter = Arbiter(
   onGameOver: (GameOverBy gameOverBy) {
     if (gameOverBy == GameOverBy.resign) {
-      print(game.turn); // player resigned
+      debugPrint(game.turn.name); // player resigned
     }
   },
 );
@@ -45,12 +45,12 @@ someFunc() {
 
   // Read black player's time left (in seconds)
   game.blackTimeStream.listen((time) {
-    print('Black\'s time left: $time');
+    debugPrint('Black\'s time left: $time');
   });
 
   // Read white player's time left (in seconds)
   game.whiteTimeStream.listen((time) {
-    print('White\'s time left: $time');
+    debugPrint('White\'s time left: $time');
   });
 
   game.resign =
