@@ -43,6 +43,8 @@ import 'package:chess_board_widget/models/BoardThemeConfig.dart';
 
 ## Example
 
+See [Example](example/main.dart) for more details and refer to comments in the code
+
 ```dart
 import 'package:chess_interface/arbiter/arbiter.dart';
 import 'package:chess_interface/env.dart';
