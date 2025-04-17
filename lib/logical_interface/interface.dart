@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:chess_interface/chess_board_widget.dart';
 
 import 'move_validator.dart';
@@ -9,6 +10,32 @@ class Position {
   final int col;
 
   Position({required this.row, required this.col});
+
+  /// Either [String] or [Map<String, int>]
+  factory Position.fromJson(dynamic json) {
+    assert(json != null, 'JSON cannot be null');
+    assert(
+      json is String || json is Map<String, int>,
+      'Invalid JSON format for Position',
+    );
+    json = (json is String ? jsonDecode(json) : json) as Map<String, int>;
+
+    assert(
+      json['row'] != null && json['col'] != null,
+      'row or col cannot be null in JSON format for Position',
+    );
+    return Position(row: json['row']!, col: json['col']!);
+  }
+
+  T toJson<T>() {
+    Map<String, int> map = {'row': row, 'col': col};
+
+    if (T == String) {
+      return jsonEncode(map) as T;
+    } else {
+      return map as T;
+    }
+  }
 
   @override
   bool operator ==(Object other) =>
