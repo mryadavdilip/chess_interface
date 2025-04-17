@@ -17,11 +17,11 @@ enum GameOverBy {
 }
 
 class Arbiter {
-  /// _defaultPromotionDialog is shown if this field is null and [showDialogs] is true. Callback is made when a pawn reaches the promotion rank. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn and return the promotion status either true or false.
-  final Future<bool> Function(Position position)? onPromotion;
+  /// Callback when game is over. If null and [showDialogs] is true and context is provided, [_defaultGameOverDialog] is shown.
+  final void Function(GameOverBy)? onGameOver;
 
-  /// Callback when game is over. must return true/false to check and update state if game is reset or not
-  final Future<bool> Function(GameOverBy)? onGameOver;
+  /// _defaultPromotionDialog is shown if this field is null and [showDialogs] is true. Callback is made when a pawn reaches the promotion rank. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn and must return the promotion status either true or false.
+  final Future<bool> Function(Position position)? onReachingPromotionRank;
 
   /// true by default, show dialogs when arbiter detects a state
   final bool showDialogs;
@@ -29,11 +29,15 @@ class Arbiter {
   /// Required context to show dialogs, if [showDialogs] is true
   final BuildContext? context;
 
+  /// Callback when pawn is promoted either by user or the default one [PieceType.queen] when user fails to select a piece. This callback is made when either [onReachingPromotionRank] or the [_defaultPromotionDialog] returns a value (true or false).
+  final Function(Position position, ChessPiece? promotedTo)? onPromoted;
+
   Arbiter({
     this.onGameOver,
-    this.onPromotion,
+    this.onReachingPromotionRank,
     this.showDialogs = true,
     this.context,
+    this.onPromoted,
   });
 
   /// Countdown for player time, if [game] has [timeLimit].
@@ -48,7 +52,7 @@ class Arbiter {
           game.switchTimer(stop: true);
           whiteTimeSubscription?.cancel();
 
-          spectateForGameEnd(game);
+          checkForGameEnd(game);
         }
       });
 
@@ -57,7 +61,7 @@ class Arbiter {
           game.switchTimer(stop: true);
           blackTimeSubscription?.cancel();
 
-          spectateForGameEnd(game);
+          checkForGameEnd(game);
         }
       });
     }
@@ -69,17 +73,29 @@ class Arbiter {
     Position position,
   ) async {
     if (game.isEligibleForPromotion(position)) {
-      if (onPromotion != null) {
-        return await onPromotion!(position);
-      } else if (showDialogs) {
-        return await _defaultPromotionDialog(game, position);
+      bool isPromoted =
+          await (onReachingPromotionRank == null && showDialogs
+              ? _defaultPromotionDialog(game, position)
+              : onReachingPromotionRank != null
+              ? onReachingPromotionRank!(position)
+              : Future.value(false));
+
+      if (!isPromoted) {
+        game.promotePawn(position, PieceType.queen);
+        isPromoted = true;
       }
+
+      if (onPromoted != null) {
+        onPromoted!(position, game.getPiece(position));
+      }
+
+      return isPromoted;
     }
     return false;
   }
 
   /// returns if game is over (isReset)
-  Future<bool> spectateForGameEnd(ChessBoardInterface game) async {
+  Future<bool> checkForGameEnd(ChessBoardInterface game) async {
     GameOverBy? gameOverBy;
 
     if (game.isCheckmate()) {
@@ -145,11 +161,6 @@ class Arbiter {
             ),
           ),
     );
-
-    if (!isPromoted) {
-      game.promotePawn(position, PieceType.queen);
-      isPromoted = true;
-    }
 
     return isPromoted;
   }

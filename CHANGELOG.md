@@ -31,3 +31,7 @@
 ## 1.1.0
 
 * Added logic for optional fields 'playAs', 'onMove' and 'rotateBoard' in ChessBoardWidget, and promotion handling safety
+
+## 1.1.1
+
+* Promotion handling option and onPromoted

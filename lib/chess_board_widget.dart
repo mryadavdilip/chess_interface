@@ -79,7 +79,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
         widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
           if (v) setState(() {});
         });
-        widget.arbiter.spectateForGameEnd(widget.game).then((v) {
+        widget.arbiter.checkForGameEnd(widget.game).then((v) {
           if (v) setState(() {});
         });
 
@@ -96,7 +96,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
   @override
   void initState() {
     if (widget.spectateInitially) {
-      widget.arbiter.spectateForGameEnd(widget.game); // handler for game over
+      widget.arbiter.checkForGameEnd(widget.game); // handler for game over
     }
 
     widget.arbiter.countdownSpectator(widget.game); // timeout handler
