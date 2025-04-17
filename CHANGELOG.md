@@ -35,3 +35,8 @@
 ## 1.1.1
 
 * Promotion handling option and onPromoted
+
+## 1.1.2
+
+* Implemented chess_interface_dart for better experience
+* Use FlutterArbiter instead of Arbiter in your front-end project

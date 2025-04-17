@@ -1,24 +1,13 @@
 import 'dart:async';
 
-import 'package:chess_interface/chess_board_widget.dart';
-import 'package:chess_interface/logical_interface/interface.dart';
-import 'package:chess_interface/logical_interface/piece.dart';
+import 'package:chess_interface_dart/arbiter/arbiter.dart';
+import 'package:chess_interface_dart/logical_interface/interface.dart';
+import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
 
-enum GameOverBy {
-  checkmate,
-  stalemate,
-  insufficientMaterial,
-  threefoldRepetition,
-  fiftyMoveRule,
-  draw,
-  resign,
-  timeOut,
-}
-
-class Arbiter {
+class FlutterArbiter extends Arbiter {
   /// Callback when game is over. If null and [showDialogs] is true and context is provided, [_defaultGameOverDialog] is shown.
-  final void Function(GameOverBy)? onGameOver;
+  // final Function(GameOverBy)? onGameOver;
 
   /// _defaultPromotionDialog is shown if this field is null and [showDialogs] is true. Callback is made when a pawn reaches the promotion rank. Use [ChessBoardInterface].promotePawn([Position], [PieceType]) to promote the pawn and must return the promotion status either true or false.
   final Future<bool> Function(Position position)? onReachingPromotionRank;
@@ -32,40 +21,13 @@ class Arbiter {
   /// Callback when pawn is promoted either by user or the default one [PieceType.queen] when user fails to select a piece. This callback is made when either [onReachingPromotionRank] or the [_defaultPromotionDialog] returns a value (true or false).
   final Function(Position position, ChessPiece? promotedTo)? onPromoted;
 
-  Arbiter({
-    this.onGameOver,
+  FlutterArbiter({
+    super.onGameOver,
     this.onReachingPromotionRank,
     this.showDialogs = true,
     this.context,
     this.onPromoted,
   });
-
-  /// Countdown for player time, if [game] has [timeLimit].
-  /// It is being used in [ChessBoardWidget] to start [countdownSpectator] when widget is created
-  void countdownSpectator(ChessBoardInterface game) {
-    StreamSubscription<int>? whiteTimeSubscription;
-    StreamSubscription<int>? blackTimeSubscription;
-
-    if (game.timeLimit != null) {
-      whiteTimeSubscription = game.whiteTimeStream.listen((countdown) {
-        if (countdown <= 0) {
-          game.switchTimer(stop: true);
-          whiteTimeSubscription?.cancel();
-
-          checkForGameEnd(game);
-        }
-      });
-
-      blackTimeSubscription = game.blackTimeStream.listen((countdown) {
-        if (countdown <= 0) {
-          game.switchTimer(stop: true);
-          blackTimeSubscription?.cancel();
-
-          checkForGameEnd(game);
-        }
-      });
-    }
-  }
 
   /// Returns true if player chose a piece (isPromoted)
   Future<bool> promotionCheck(
@@ -95,26 +57,8 @@ class Arbiter {
   }
 
   /// returns if game is over (isReset)
-  Future<bool> checkForGameEnd(ChessBoardInterface game) async {
-    GameOverBy? gameOverBy;
-
-    if (game.isCheckmate()) {
-      gameOverBy = GameOverBy.checkmate;
-    } else if (game.isStalemate()) {
-      gameOverBy = GameOverBy.stalemate;
-    } else if (game.isDraw) {
-      gameOverBy = GameOverBy.draw;
-    } else if (game.resign != null) {
-      gameOverBy = GameOverBy.resign;
-    } else if (game.isTimeOut()) {
-      gameOverBy = GameOverBy.timeOut;
-    } else if (game.isInsufficientMaterial()) {
-      gameOverBy = GameOverBy.insufficientMaterial;
-    } else if (game.isThreefoldRepetition()) {
-      gameOverBy = GameOverBy.threefoldRepetition;
-    } else if (game.isFiftyMoveDraw()) {
-      gameOverBy = GameOverBy.fiftyMoveRule;
-    }
+  Future<bool> showDialogOnGameOver(ChessBoardInterface game) async {
+    GameOverBy? gameOverBy = checkForGameEnd(game);
 
     if (gameOverBy != null) {
       if (onGameOver != null) {

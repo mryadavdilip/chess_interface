@@ -1,17 +1,18 @@
 import 'dart:math';
-
-import 'package:chess_interface/arbiter/arbiter.dart';
-import 'package:chess_interface/utils/color_extension.dart';
+import 'package:chess_interface/arbiter/flutter_arbiter.dart';
+import 'package:chess_interface/extensions/chess_piece.dart';
+import 'package:chess_interface/extensions/color.dart';
+import 'package:chess_interface/extensions/piece_color.dart';
+import 'package:chess_interface_dart/logical_interface/interface.dart';
+import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:gradient_circular_progress_indicator/gradient_circular_progress_indicator.dart';
-import 'package:chess_interface/logical_interface/interface.dart';
-import 'package:chess_interface/logical_interface/piece.dart';
 
 class ChessBoardWidget extends StatefulWidget {
   final ChessBoardInterface game;
 
-  final Arbiter arbiter;
+  final FlutterArbiter arbiter;
 
   /// Define which side the player has to play, black or white and the other pieces will be no longer be interactive for the player. Keep this null when both players are playing in same device (i.e. in case of offline match).
   final PieceColor? playAs;
@@ -79,7 +80,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
         widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
           if (v) setState(() {});
         });
-        widget.arbiter.checkForGameEnd(widget.game).then((v) {
+        widget.arbiter.showDialogOnGameOver(widget.game).then((v) {
           if (v) setState(() {});
         });
 

@@ -30,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.1.1
+  chess_interface: ^1.1.2
 ```
 
 Then import these:
@@ -46,48 +46,62 @@ import 'package:chess_board_widget/models/BoardThemeConfig.dart';
 See [Example](example/main.dart) for more details and refer to comments in the code
 
 ```dart
-import 'package:chess_interface/arbiter/arbiter.dart';
-import 'package:chess_interface/env.dart';
-import 'package:chess_interface/logical_interface/piece.dart';
+import 'dart:math';
+import 'package:chess_interface/arbiter/flutter_arbiter.dart';
+import 'package:chess_interface/extensions/chess_piece.dart';
+import 'package:chess_interface/extensions/color.dart';
+import 'package:chess_interface/extensions/piece_color.dart';
+import 'package:chess_interface_dart/logical_interface/interface.dart';
+import 'package:chess_interface_dart/logical_interface/piece.dart';
+import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 
-import 'package:flutter/material.dart';
+ChessBoardWidget(
+  game: ChessBoardInterface(
+    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K',
+    timeLimit: Duration(minutes: 10)),
+  ),
 
-        ChessBoardWidget(
-            game: game,
-            // optional
-            onMove: (Position from, Position to) {},
-            // optional
-            playAs: PieceColor.black,
+  // optional
+  onMove: (Position from, Position to) {},
 
-            // false by default
-            rotateBoard: true,
-            arbiter: Arbiter(
-              showDialogs: true,
-              context: context,
-              onGameOver: (gameOverBy) {
-                // todo: handle gameOver
-              },
+  // optional
+  playAs: PieceColor.black,
 
-              // optional
-              onReachingPromotionRank: (position) async {
-                // todo: show pieces to player to promote and must return whether player chose a piece or not, if returns false (i.e, player doesn't choose a piece), default promotion is made to queen.
-                return true;
-              },
+  // false by default
+  rotateBoard: true,
 
-              // callback when either player chose a piece or promoted to default (queen)
-              onPromoted: (position, promotedTo) {},
-            ),
-            // true by default
-            spectateInitially: false,
-            boardSize: 300,
-            config: BoardThemeConfig(
-              boardColor: Colors.limeAccent,
+  arbiter: FlutterArbiter(
+    showDialogs: true,
 
-              /// To add your own resources, refer to the assets folder structure inside this package. If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces. If you've simple and fillable png recourses, simply add them in "assets/your_materials_name/bishop.png" path.
-              materialVariety: materialsResources.keys.first,
-            ),
-        ),
+    context: context,
+    
+    onGameOver: (gameOverBy) {
+      // todo: handle gameOver
+    },
+
+    // optional
+    onReachingPromotionRank: (position) async {
+      // todo: show pieces to player to promote and must return whether player chose a piece or not, if returns false (i.e, player doesn't choose a piece), default promotion is made to queen.
+      return true;
+    },
+
+    // callback when either player chose a piece or promoted to default (queen)
+    onPromoted: (position, promotedTo) {},
+  ),
+
+  // true by default
+  spectateInitially: false,
+  
+  boardSize: 300,
+  
+  config: BoardThemeConfig(
+    boardColor: Colors.limeAccent,
+
+    /// To add your own resources, refer to the assets folder structure inside this package. If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces. If you've simple and fillable png recourses, simply add them in "assets/your_materials_name/bishop.png" path.
+    materialVariety: materialsResources.keys.first,
+  ),
+),
 ```
 
 ## Configuration
@@ -127,9 +141,9 @@ It supports:
 - Castling logic (including history tracking)
 - En passant and double pawn pushes
 
-### Arbiter
+### FlutterArbiter (extends Arbiter)
 
-Arbiter to handle events like game over, time out and pawn promotion:
+FlutterArbiter to handle events like game over, time out and pawn promotion:
 
 ## And more..
 

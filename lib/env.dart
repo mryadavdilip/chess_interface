@@ -1,5 +1,5 @@
+import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
-import 'package:chess_interface/logical_interface/piece.dart';
 
 /// To add your own resources, refer to the assets folder structure inside this package.
 /// If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces.

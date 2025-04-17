@@ -1,12 +1,13 @@
-import 'package:chess_interface/arbiter/arbiter.dart';
 import 'package:chess_interface/env.dart';
-import 'package:chess_interface/logical_interface/move_validator.dart';
-import 'package:chess_interface/logical_interface/piece.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
+import 'package:chess_interface/arbiter/flutter_arbiter.dart';
+import 'package:chess_interface_dart/arbiter/arbiter.dart';
+import 'package:chess_interface_dart/logical_interface/interface.dart';
+import 'package:chess_interface_dart/logical_interface/move_validator.dart';
+import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
 // import 'package:share_plus/share_plus.dart';
 import 'package:chess_interface/chess_board_widget.dart';
-import 'package:chess_interface/logical_interface/interface.dart';
 
 ChessBoardInterface game = ChessBoardInterface(
   // optional
@@ -16,7 +17,7 @@ ChessBoardInterface game = ChessBoardInterface(
   timeLimit: Duration(minutes: 10),
 );
 
-Arbiter arbiter = Arbiter(
+FlutterArbiter arbiter = FlutterArbiter(
   onGameOver: (GameOverBy gameOverBy) {
     if (gameOverBy == GameOverBy.resign) {
       debugPrint(game.turn.name); // player resigned
@@ -175,7 +176,7 @@ class _GameScreenState extends State<GameScreen> {
 
             // false by default
             rotateBoard: true,
-            arbiter: Arbiter(
+            arbiter: FlutterArbiter(
               showDialogs: true,
               context: context,
               onGameOver: (gameOverBy) {

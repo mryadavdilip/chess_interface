@@ -1,23 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:chess_interface/env.dart';
-
-enum PieceType { pawn, knight, bishop, rook, queen, king }
-
-enum PieceColor { white, black }
-
-extension PieceColorExtension on PieceColor {
-  Color toColor() => switch (this) {
-    PieceColor.white => Colors.white,
-    PieceColor.black => Colors.black,
-  };
-}
-
-class ChessPiece {
-  final PieceType type;
-  final PieceColor color;
-
-  ChessPiece({required this.type, required this.color});
-}
+import 'package:chess_interface/extensions/piece_color.dart';
+import 'package:chess_interface_dart/logical_interface/piece.dart';
+import 'package:flutter/widgets.dart';
 
 extension ChessPieceExtension on ChessPiece {
   Future<Image> getResource(String materialVariety) async {
