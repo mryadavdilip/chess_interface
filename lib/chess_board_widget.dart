@@ -55,6 +55,12 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
   Position? selectedPosition;
   List<Position> validMoves = [];
 
+  double get angle =>
+      (widget.rotateBoard && widget.game.turn == PieceColor.black) ||
+              widget.playAs == PieceColor.black
+          ? pi
+          : 0; // pi for 180 degree rotation
+
   void _onSquareTap(int row, int col) {
     Position tappedPosition = Position(row: row, col: col);
     ChessPiece? piece = widget.game.getPiece(tappedPosition);
@@ -116,11 +122,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
     double boxSize = widget.boardSize / 8;
 
     return Transform.rotate(
-      angle:
-          (widget.rotateBoard && widget.game.turn == PieceColor.black) ||
-                  widget.playAs == PieceColor.black
-              ? pi
-              : 0, // pi for 180 degree rotation
+      angle: angle,
       child: SizedBox(
         height: widget.boardSize,
         width: widget.boardSize,
@@ -183,13 +185,16 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
                         widget.config.materialVariety!,
                       ),
                       builder: (context, ss) {
-                        return Padding(
-                          padding: EdgeInsets.all(
-                            piece?.type == PieceType.pawn
-                                ? boxSize * 0.2
-                                : boxSize * 0.1,
+                        return Transform.rotate(
+                          angle: angle,
+                          child: Padding(
+                            padding: EdgeInsets.all(
+                              piece?.type == PieceType.pawn
+                                  ? boxSize * 0.2
+                                  : boxSize * 0.1,
+                            ),
+                            child: ss.data ?? SizedBox.shrink(),
                           ),
-                          child: ss.data ?? SizedBox.shrink(),
                         );
                       },
                     ),
