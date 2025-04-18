@@ -14,7 +14,6 @@ dependencies:
   chess_interface_dart: ^1.0.7
   
   gradient_circular_progress_indicator: ^0.0.4
-  provider: ^6.1.4
 
 dev_dependencies:
   flutter_test:
