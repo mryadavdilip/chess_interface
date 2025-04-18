@@ -10,6 +10,8 @@ import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:gradient_circular_progress_indicator/gradient_circular_progress_indicator.dart';
 
 class ChessBoardWidget extends StatefulWidget {
+  final Function(BuildContext)? updatedContext;
+
   final ChessBoardInterface game;
 
   final FlutterArbiter arbiter;
@@ -34,6 +36,7 @@ class ChessBoardWidget extends StatefulWidget {
   final BoardThemeConfig config;
   const ChessBoardWidget({
     super.key,
+    this.updatedContext,
     required this.game,
     required this.arbiter,
     this.playAs,
@@ -106,6 +109,10 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.updatedContext != null) {
+      widget.updatedContext!(context);
+    }
+
     double boxSize = widget.boardSize / 8;
 
     return Transform.rotate(
