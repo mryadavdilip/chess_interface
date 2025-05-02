@@ -61,45 +61,87 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
           ? pi
           : 0; // pi for 180 degree rotation
 
+  // void _onSquareTap(int row, int col) {
+  //   Position tappedPosition = Position(row: row, col: col);
+  //   ChessPiece? piece = widget.game.getPiece(tappedPosition);
+
+  //   // // If it's your turn and you tap on a pawn on the promotion rank, show the promotion dialog.
+  //   // if (piece != null &&
+  //   //     (widget.playAs != null ? true : piece.color == widget.game.turn) &&
+  //   //     piece.type == PieceType.pawn &&
+  //   //     (tappedPosition.row == 0 || tappedPosition.row == 7)) {
+  //   //   widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
+  //   //     if (v) setState(() {});
+  //   //   });
+  //   //   return; // Exit so that the normal selection/move logic isn't executed.
+  //   // }
+
+  //   // Normal selection/move process:
+  //   if (selectedPosition == null &&
+  //       piece != null &&
+  //       piece.color == widget.game.turn) {
+  //     selectedPosition = tappedPosition;
+  //     validMoves = widget.game.getValidMoves(tappedPosition);
+  //     setState(() {});
+  //   } else if (widget.playAs == null || piece?.color == widget.playAs) {
+  //     // If a piece is already selected, attempt to move it.
+  //     if (widget.game.move(selectedPosition!, tappedPosition)) {
+  //       widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
+  //         if (v) setState(() {});
+  //       });
+  //       widget.arbiter.showDialogOnGameOver(widget.game).then((v) {
+  //         if (v) setState(() {});
+  //       });
+
+  //       if (widget.onMove != null) {
+  //         widget.onMove!(selectedPosition!, tappedPosition);
+  //       }
+  //     }
+  //     selectedPosition = null;
+  //     validMoves = [];
+  //     setState(() {});
+  //   }
+  // }
+
+  // Helper to attempt a move and reset selection
+  void attemptMove(Position from, Position to) {
+    if (widget.game.move(from, to)) {
+      widget.arbiter.promotionCheck(widget.game, to).then((v) {
+        if (v) setState(() {});
+      });
+      widget.arbiter.showDialogOnGameOver(widget.game).then((v) {
+        if (v) setState(() {});
+      });
+      if (widget.onMove != null) {
+        widget.onMove!(from, to);
+      }
+    }
+    selectedPosition = null;
+    validMoves = [];
+    setState(() {});
+  }
+
+  // Helper to select a piece and show valid moves
+  void select(Position pos) {
+    selectedPosition = pos;
+    validMoves = widget.game.getValidMoves(pos);
+    setState(() {});
+  }
+
   void _onSquareTap(int row, int col) {
     Position tappedPosition = Position(row: row, col: col);
     ChessPiece? piece = widget.game.getPiece(tappedPosition);
 
-    // // If it's your turn and you tap on a pawn on the promotion rank, show the promotion dialog.
-    // if (piece != null &&
-    //     (widget.playAs != null ? true : piece.color == widget.game.turn) &&
-    //     piece.type == PieceType.pawn &&
-    //     (tappedPosition.row == 0 || tappedPosition.row == 7)) {
-    //   widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
-    //     if (v) setState(() {});
-    //   });
-    //   return; // Exit so that the normal selection/move logic isn't executed.
-    // }
+    bool isOnline = widget.playAs != null;
+    bool isPlayerPiece = piece != null && piece.color == widget.playAs;
+    bool isTurnPiece = piece != null && piece.color == widget.game.turn;
 
-    // Normal selection/move process:
-    if (selectedPosition == null &&
-        piece != null &&
-        piece.color == widget.game.turn) {
-      selectedPosition = tappedPosition;
-      validMoves = widget.game.getValidMoves(tappedPosition);
-      setState(() {});
-    } else if (widget.playAs == null || piece?.color == widget.playAs) {
-      // If a piece is already selected, attempt to move it.
-      if (widget.game.move(selectedPosition!, tappedPosition)) {
-        widget.arbiter.promotionCheck(widget.game, tappedPosition).then((v) {
-          if (v) setState(() {});
-        });
-        widget.arbiter.showDialogOnGameOver(widget.game).then((v) {
-          if (v) setState(() {});
-        });
-
-        if (widget.onMove != null) {
-          widget.onMove!(selectedPosition!, tappedPosition);
-        }
+    if (selectedPosition == null) {
+      if ((isOnline && isPlayerPiece) || (!isOnline && isTurnPiece)) {
+        select(tappedPosition);
       }
-      selectedPosition = null;
-      validMoves = [];
-      setState(() {});
+    } else {
+      attemptMove(selectedPosition!, tappedPosition);
     }
   }
 
