@@ -30,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.1.5
+  chess_interface: ^1.1.6
 ```
 
 Then import these:
@@ -68,11 +68,17 @@ import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 
-ChessBoardWidget(
-  game: ChessBoardInterface(
-    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K',
-    timeLimit: Duration(minutes: 10),
+/// initialize game
+Provider.of<ChessBoardProvider>(context, listen: false).init(
+  ChessBoardInterface(
+    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    timeLimit: const Duration(minutes: 10),
   ),
+);
+
+/// use chess board widget
+ChessBoardWidget(
+  game: Provider.of<ChessBoardProvider>(context, listen: true).game,
 
   // optional
   onMove: (Position from, Position to) {},
@@ -116,10 +122,8 @@ ChessBoardWidget(
 ),
 
 
-someFunc() {
-  /// call this to rebuild ChessBoardWidget, when some change is made to the [ChessBoardInterface]
-  Provider.of<ChessBoardProvider>(context, listen: false).notify();
-}
+/// call this to rebuild ChessBoardWidget, when some change is made to the [ChessBoardInterface]
+Provider.of<ChessBoardProvider>(context, listen: false).notify();
 ```
 
 ## Configuration

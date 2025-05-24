@@ -2,110 +2,11 @@ import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:chess_interface/env.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:chess_interface/arbiter/flutter_arbiter.dart';
+import 'package:chess_interface/providers/chess_board_provider.dart';
 import 'package:flutter/material.dart';
 // import 'package:share_plus/share_plus.dart';
 import 'package:chess_interface/chess_board_widget.dart';
-
-ChessBoardInterface game = ChessBoardInterface(
-  // optional
-  fen: 'qkN/p7/8/8/8...',
-
-  // optional
-  timeLimit: Duration(minutes: 10),
-);
-
-FlutterArbiter arbiter = FlutterArbiter(
-  onGameOver: (GameOverBy gameOverBy) {
-    if (gameOverBy == GameOverBy.resign) {
-      debugPrint(game.turn.name); // player resigned
-    }
-  },
-);
-
-someFunc() {
-  MoveValidator.canCastleKingSide(game, PieceColor.black);
-  MoveValidator.canCastleQueenSide(game, PieceColor.black);
-
-  // start spectation for countdown
-  arbiter.countdownSpectator(game);
-
-  // check whether game is over for any reason, draw, checkmate, time-over, etc. It shows provided or default dialog accordingly
-  arbiter.checkForGameEnd(game);
-
-  // get legal moves for a particular ChessPiece
-  game.getValidMoves(Position(row: 5, col: 3));
-
-  // Use this to move a piece with validations
-  game.move(Position(row: 3, col: 2), Position(row: 6, col: 2));
-
-  // Use this to move a piece without validation
-  game.movePiece(Position(row: 3, col: 2), Position(row: 7, col: 5));
-
-  // Read black player's time left (in seconds)
-  game.blackTimeStream.listen((time) {
-    debugPrint('Black\'s time left: $time');
-  });
-
-  // Read white player's time left (in seconds)
-  game.whiteTimeStream.listen((time) {
-    debugPrint('White\'s time left: $time');
-  });
-
-  game.resign =
-      PieceColor
-          .black; // set resignation, and then call arbiter.checkForGameEnd method if countdownSpectator is not spectating already.
-
-  // Which player is to move
-  game.turn;
-
-  // To access arrangement of board pieces in 2D List
-  game.board;
-
-  // FEN of the current game state
-  game.toFEN();
-
-  // En-passant target (when a pawn moves two boxes, e.g., from initial (2nd) rank to 4th rank , it becomes en-passant target)
-  game.enPassantTarget;
-
-  // get half move clock (int)
-  game.halfMoveClock;
-
-  // get full move number (int)
-  game.fullMoveNumber;
-
-  // List of full FEN strings. Doesn't includes current state
-  game.history;
-
-  // List of full FEN strings
-  game.redoHistory;
-
-  // whether it's draw for any reason
-  game.isDraw;
-
-  // verify checkmate state
-  game.isCheckmate();
-
-  // check whether pawn on a position, eligible for promotion
-  game.isEligibleForPromotion(Position(row: 7, col: 1));
-
-  // check if game state complies with fifty-move draw rule
-  game.isFiftyMoveDraw();
-
-  // check whether board has insufficient materials left
-  game.isInsufficientMaterial();
-
-  // check whether king is in check
-  game.isKingInCheck();
-
-  // check whether it's stalemate
-  game.isStalemate();
-
-  // check whether it's threefold repetition
-  game.isThreefoldRepetition();
-
-  // check whether timeout for any player
-  game.isTimeOut();
-}
+import 'package:provider/provider.dart';
 
 void main(List<String> args) {
   runApp(const MyApp());
@@ -128,17 +29,115 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  ChessBoardInterface game = ChessBoardInterface();
+  someFunc() {
+    MoveValidator.canCastleKingSide(game!, PieceColor.black);
+    MoveValidator.canCastleQueenSide(game!, PieceColor.black);
+
+    // start spectation for countdown
+    arbiter.countdownSpectator(game!);
+
+    // check whether game is over for any reason, draw, checkmate, time-over, etc. It shows provided or default dialog accordingly
+    arbiter.checkForGameEnd(game!);
+
+    // get legal moves for a particular ChessPiece
+    game!.getValidMoves(Position(row: 5, col: 3));
+
+    // Use this to move a piece with validations
+    game!.move(Position(row: 3, col: 2), Position(row: 6, col: 2));
+
+    // Use this to move a piece without validation
+    game!.movePiece(Position(row: 3, col: 2), Position(row: 7, col: 5));
+
+    // Read black player's time left (in seconds)
+    game!.blackTimeStream.listen((time) {
+      debugPrint('Black\'s time left: $time');
+    });
+
+    // Read white player's time left (in seconds)
+    game!.whiteTimeStream.listen((time) {
+      debugPrint('White\'s time left: $time');
+    });
+
+    game!.resign =
+        PieceColor
+            .black; // set resignation, and then call arbiter.checkForGameEnd method if countdownSpectator is not spectating already.
+
+    // Which player is to move
+    game!.turn;
+
+    // To access arrangement of board pieces in 2D List
+    game!.board;
+
+    // FEN of the current game state
+    game!.toFEN();
+
+    // En-passant target (when a pawn moves two boxes, e.g., from initial (2nd) rank to 4th rank , it becomes en-passant target)
+    game!.enPassantTarget;
+
+    // get half move clock (int)
+    game!.halfMoveClock;
+
+    // get full move number (int)
+    game!.fullMoveNumber;
+
+    // List of full FEN strings. Doesn't includes current state
+    game!.history;
+
+    // List of full FEN strings
+    game!.redoHistory;
+
+    // whether it's draw for any reason
+    game!.isDraw;
+
+    // verify checkmate state
+    game!.isCheckmate();
+
+    // check whether pawn on a position, eligible for promotion
+    game!.isEligibleForPromotion(Position(row: 7, col: 1));
+
+    // check if game state complies with fifty-move draw rule
+    game!.isFiftyMoveDraw();
+
+    // check whether board has insufficient materials left
+    game!.isInsufficientMaterial();
+
+    // check whether king is in check
+    game!.isKingInCheck();
+
+    // check whether it's stalemate
+    game!.isStalemate();
+
+    // check whether it's threefold repetition
+    game!.isThreefoldRepetition();
+
+    // check whether timeout for any player
+    game!.isTimeOut();
+  }
+
+  _initGame() {
+    Provider.of<ChessBoardProvider>(context, listen: false).init(
+      ChessBoardInterface(
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        timeLimit: const Duration(minutes: 10),
+      ),
+    );
+  }
+
+  ChessBoardInterface? game;
+
+  FlutterArbiter get arbiter => FlutterArbiter(
+    onGameOver: (GameOverBy gameOverBy) {
+      if (gameOverBy == GameOverBy.resign) {
+        debugPrint(game!.turn.name); // player resigned
+      }
+    },
+  );
+
   Position? selectedPosition;
   List<Position> validMoves = [];
 
   void _saveGame() async {
     // await StorageService.saveGameState(game.toFEN());
-  }
-
-  void _resetGame() {
-    game = ChessBoardInterface();
-    setState(() {});
   }
 
   void _shareGame() {
@@ -148,24 +147,26 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    _resetGame();
+    _initGame();
   }
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ChessBoardProvider>(context, listen: true).game;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Smart Chess"),
         actions: [
           IconButton(icon: const Icon(Icons.save), onPressed: _saveGame),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _resetGame),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _initGame),
           IconButton(icon: const Icon(Icons.share), onPressed: _shareGame),
         ],
       ),
       body: Column(
         children: [
           ChessBoardWidget(
-            game: game,
+            game: game!,
             // optional
             onMove: (Position from, Position to) {},
             // optional
@@ -205,9 +206,9 @@ class _GameScreenState extends State<GameScreen> {
             children: [
               MaterialButton(
                 onPressed:
-                    game.canUndo()
+                    game!.canUndo()
                         ? () {
-                          game.undo();
+                          game!.undo();
                           selectedPosition = null;
                           validMoves.clear();
                           setState(() {});
@@ -217,9 +218,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
               MaterialButton(
                 onPressed:
-                    game.canRedo()
+                    game!.canRedo()
                         ? () {
-                          game.redo();
+                          game!.redo();
                           selectedPosition = null;
                           validMoves.clear();
                           setState(() {});

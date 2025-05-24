@@ -41,6 +41,6 @@
 - Implemented chess_interface_dart for better experience
 - Use FlutterArbiter instead of Arbiter in your front-end project
 
-## 1.1.5
+## 1.1.6
 
 - Fixed box tap logic for both online and offline mode, that was not working earlier
