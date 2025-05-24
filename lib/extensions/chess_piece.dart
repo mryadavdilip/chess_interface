@@ -1,6 +1,6 @@
+import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:chess_interface/env.dart';
 import 'package:chess_interface/extensions/piece_color.dart';
-import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/widgets.dart';
 
 extension ChessPieceExtension on ChessPiece {

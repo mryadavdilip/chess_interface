@@ -30,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.1.4
+  chess_interface: ^1.1.5
 ```
 
 Then import these:
@@ -64,8 +64,7 @@ import 'package:chess_interface/arbiter/flutter_arbiter.dart';
 import 'package:chess_interface/extensions/chess_piece.dart';
 import 'package:chess_interface/extensions/color.dart';
 import 'package:chess_interface/extensions/piece_color.dart';
-import 'package:chess_interface_dart/logical_interface/interface.dart';
-import 'package:chess_interface_dart/logical_interface/piece.dart';
+import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 

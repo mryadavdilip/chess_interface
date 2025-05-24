@@ -1,4 +1,4 @@
-import 'package:chess_interface_dart/logical_interface/piece.dart';
+import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:flutter/material.dart';
 
 /// To add your own resources, refer to the assets folder structure inside this package.

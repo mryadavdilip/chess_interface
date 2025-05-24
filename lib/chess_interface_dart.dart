@@ -3,3 +3,4 @@ export 'package:chess_interface_dart/arbiter/arbiter.dart';
 export 'package:chess_interface_dart/logical_interface/interface.dart';
 export 'package:chess_interface_dart/logical_interface/move_validator.dart';
 export 'package:chess_interface_dart/logical_interface/piece.dart';
+export 'package:chess_interface_dart/logical_interface/position.dart';

@@ -1,11 +1,10 @@
 import 'dart:math';
 import 'package:chess_interface/arbiter/flutter_arbiter.dart';
+import 'package:chess_interface/chess_interface_dart.dart';
 import 'package:chess_interface/extensions/chess_piece.dart';
 import 'package:chess_interface/extensions/color.dart';
 import 'package:chess_interface/extensions/piece_color.dart';
 import 'package:chess_interface/providers/chess_board_provider.dart';
-import 'package:chess_interface_dart/logical_interface/interface.dart';
-import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:gradient_circular_progress_indicator/gradient_circular_progress_indicator.dart';
