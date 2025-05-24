@@ -2,7 +2,7 @@
 
 # chess_interface
 
-This is a flutter package and doesn't <u>pure dart based project</u>. For dart / backend project, checkout [chess_interface_dart](https://www.pub.dev/packages/chess_interface_dart) Package.
+This is a flutter package and doesn't support pure dart based project. For dart / backend project, checkout [chess_interface_dart](https://www.pub.dev/packages/chess_interface_dart) Package.
 
 A customizable, feature-rich chess board widget built in Flutter. This package offers a robust foundation for integrating chess gameplay into your Flutter apps — complete with piece rendering, move validation, theming, and more.
 
@@ -30,7 +30,7 @@ OR
 
 ```yaml
 dependencies:
-  chess_interface: ^1.1.2
+  chess_interface: ^1.1.4
 ```
 
 Then import these:
@@ -39,6 +39,19 @@ Then import these:
 import 'package:chess_board_widget/chess_board_widget.dart';
 import 'package:chess_board_widget/logical_interface/interface.dart';
 import 'package:chess_board_widget/models/BoardThemeConfig.dart';
+```
+
+Initialize ChessBoardProvider in your project
+
+```dart
+MultiProvider(
+  providers: [
+    ListenableProvider<ChessBoardProvider>(create: (_) => ChessBoardProvider()),
+  ],
+  child: Scaffold(
+    body: ChessBoardWidget(),
+  ),
+);
 ```
 
 ## Example
@@ -59,7 +72,7 @@ import 'package:chess_interface/models/board_theme_config.dart';
 ChessBoardWidget(
   game: ChessBoardInterface(
     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K',
-    timeLimit: Duration(minutes: 10)),
+    timeLimit: Duration(minutes: 10),
   ),
 
   // optional
@@ -75,7 +88,7 @@ ChessBoardWidget(
     showDialogs: true,
 
     context: context,
-    
+
     onGameOver: (gameOverBy) {
       // todo: handle gameOver
     },
@@ -92,9 +105,9 @@ ChessBoardWidget(
 
   // true by default
   spectateInitially: false,
-  
+
   boardSize: 300,
-  
+
   config: BoardThemeConfig(
     boardColor: Colors.limeAccent,
 
@@ -102,6 +115,12 @@ ChessBoardWidget(
     materialVariety: materialsResources.keys.first,
   ),
 ),
+
+
+someFunc() {
+  /// call this to rebuild ChessBoardWidget, when some change is made to the [ChessBoardInterface]
+  Provider.of<ChessBoardProvider>(context, listen: false).notify();
+}
 ```
 
 ## Configuration

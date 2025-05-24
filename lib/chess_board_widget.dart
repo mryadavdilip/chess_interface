@@ -3,15 +3,15 @@ import 'package:chess_interface/arbiter/flutter_arbiter.dart';
 import 'package:chess_interface/extensions/chess_piece.dart';
 import 'package:chess_interface/extensions/color.dart';
 import 'package:chess_interface/extensions/piece_color.dart';
+import 'package:chess_interface/providers/chess_board_provider.dart';
 import 'package:chess_interface_dart/logical_interface/interface.dart';
 import 'package:chess_interface_dart/logical_interface/piece.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_interface/models/board_theme_config.dart';
 import 'package:gradient_circular_progress_indicator/gradient_circular_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 class ChessBoardWidget extends StatefulWidget {
-  final Function(BuildContext)? updatedContext;
-
   final ChessBoardInterface game;
 
   final FlutterArbiter arbiter;
@@ -36,7 +36,6 @@ class ChessBoardWidget extends StatefulWidget {
   final BoardThemeConfig config;
   const ChessBoardWidget({
     super.key,
-    this.updatedContext,
     required this.game,
     required this.arbiter,
     this.playAs,
@@ -157,96 +156,100 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.updatedContext != null) {
-      widget.updatedContext!(context);
-    }
-
     double boxSize = widget.boardSize / 8;
 
-    return Transform.rotate(
-      angle: angle,
-      child: SizedBox(
-        height: widget.boardSize,
-        width: widget.boardSize,
-        child: GridView.builder(
-          itemCount: 64,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 8,
-            childAspectRatio: 1,
-            mainAxisExtent: boxSize,
-          ),
-          itemBuilder: (context, index) {
-            int row = index ~/ 8;
-            int col = index % 8;
-            bool isWhite = (row + col) % 2 == 0;
-
-            Position pos = Position(row: row, col: col);
-            ChessPiece? piece = widget.game.getPiece(pos);
-
-            return GestureDetector(
-              onTap: () => _onSquareTap(row, col),
-              child: Container(
-                decoration: BoxDecoration(
-                  color:
-                      isWhite
-                          ? widget.config.boardColor!.toMaterialColor()[1]
-                          : widget.config.boardColor!.toMaterialColor()[2],
-                  border:
-                      selectedPosition == pos
-                          ? Border.all(
-                            color: widget.game.turn.toColor(),
-                            width: boxSize * 0.1,
-                          )
-                          : null,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (validMoves.contains(pos))
-                      GradientCircularProgressIndicator(
-                        progress: 100,
-                        stroke: boxSize * 0.1,
-                        size:
-                            widget.game.board[row][col] == null
-                                ? boxSize * 0.9
-                                : boxSize * 0.75,
-                        gradient: SweepGradient(
-                          transform: GradientRotation(45),
-                          colors: [
-                            widget.game.turn.toColor(),
-                            widget.config.boardColor!.toMaterialColor()[1] ??
-                                Colors.white,
-                            widget.config.boardColor!.toMaterialColor()[2] ??
-                                Colors.black,
-                          ],
-                        ),
-                      ),
-                    FutureBuilder(
-                      key: ValueKey('$row-$col-${piece?.type}'),
-                      future: piece?.getResource(
-                        widget.config.materialVariety!,
-                      ),
-                      builder: (context, ss) {
-                        return Transform.rotate(
-                          angle: angle,
-                          child: Padding(
-                            padding: EdgeInsets.all(
-                              piece?.type == PieceType.pawn
-                                  ? boxSize * 0.2
-                                  : boxSize * 0.1,
-                            ),
-                            child: ss.data ?? SizedBox.shrink(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+    return Consumer<ChessBoardProvider>(
+      builder: (_, chessBoardProvider, child) {
+        return Transform.rotate(
+          angle: angle,
+          child: SizedBox(
+            height: widget.boardSize,
+            width: widget.boardSize,
+            child: GridView.builder(
+              itemCount: 64,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+                childAspectRatio: 1,
+                mainAxisExtent: boxSize,
               ),
-            );
-          },
-        ),
-      ),
+              itemBuilder: (context, index) {
+                int row = index ~/ 8;
+                int col = index % 8;
+                bool isWhite = (row + col) % 2 == 0;
+
+                Position pos = Position(row: row, col: col);
+                ChessPiece? piece = widget.game.getPiece(pos);
+
+                return GestureDetector(
+                  onTap: () => _onSquareTap(row, col),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color:
+                          isWhite
+                              ? widget.config.boardColor!.toMaterialColor()[1]
+                              : widget.config.boardColor!.toMaterialColor()[2],
+                      border:
+                          selectedPosition == pos
+                              ? Border.all(
+                                color: widget.game.turn.toColor(),
+                                width: boxSize * 0.1,
+                              )
+                              : null,
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (validMoves.contains(pos))
+                          GradientCircularProgressIndicator(
+                            progress: 100,
+                            stroke: boxSize * 0.1,
+                            size:
+                                widget.game.board[row][col] == null
+                                    ? boxSize * 0.9
+                                    : boxSize * 0.75,
+                            gradient: SweepGradient(
+                              transform: GradientRotation(45),
+                              colors: [
+                                widget.game.turn.toColor(),
+                                widget.config.boardColor!
+                                        .toMaterialColor()[1] ??
+                                    Colors.white,
+                                widget.config.boardColor!
+                                        .toMaterialColor()[2] ??
+                                    Colors.black,
+                              ],
+                            ),
+                          ),
+                        FutureBuilder(
+                          key: ValueKey('$row-$col-${piece?.type}'),
+                          future: piece?.getResource(
+                            widget.config.materialVariety!,
+                            directory: widget.config.directory!,
+                            extension: widget.config.extension!,
+                          ),
+                          builder: (context, ss) {
+                            return Transform.rotate(
+                              angle: angle,
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                  piece?.type == PieceType.pawn
+                                      ? boxSize * 0.2
+                                      : boxSize * 0.1,
+                                ),
+                                child: ss.data ?? SizedBox.shrink(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

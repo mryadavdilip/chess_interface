@@ -10,9 +10,22 @@ class BoardThemeConfig {
   /// If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces.
   /// If you've simple and fillable png recourses, simply add them in "assets/your_materials_name/bishop.png" path.
   String? materialVariety;
-  BoardThemeConfig({this.boardColor, this.materialVariety}) {
+
+  String? directory;
+
+  /// The extension of the image file. Default is png.
+  String? extension;
+  BoardThemeConfig({
+    this.boardColor,
+    this.materialVariety,
+    this.directory,
+    this.extension,
+  }) {
+    // Set default values if not provided
     boardColor ??= boardColors.first;
     materialVariety ??= materialsResources.keys.first;
+    directory ??= 'packages/chess_interface/assets';
+    extension ??= 'png';
   }
 
   factory BoardThemeConfig.fromMap(Map<String, dynamic> map) =>
