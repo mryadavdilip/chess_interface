@@ -158,7 +158,7 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
     double boxSize = widget.boardSize / 8;
 
     return Consumer<ChessBoardProvider>(
-      builder: (_, chessBoardProvider, child) {
+      builder: (_, chessBoardProvider, __) {
         return Transform.rotate(
           angle: angle,
           child: SizedBox(
