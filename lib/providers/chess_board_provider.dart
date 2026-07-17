@@ -10,7 +10,7 @@ class ChessBoardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  notify() {
+  void notify() {
     notifyListeners();
   }
 }

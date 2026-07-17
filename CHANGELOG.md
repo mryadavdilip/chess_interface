@@ -50,6 +50,6 @@
 - Added support for caller-provided piece assets via `BoardThemeConfig.pieceImageProvider` (host app can override package defaults).
 - Updated docs and example accordingly.
 
-## 1.1.8
+## 1.2.0
 
 - Docs: clarified example pointers (Flutter + backend) for better adoption.
