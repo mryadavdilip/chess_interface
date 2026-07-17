@@ -44,3 +44,12 @@
 ## 1.1.6
 
 - Fixed box tap logic for both online and offline mode, that was not working earlier
+
+## 1.1.7
+
+- Added support for caller-provided piece assets via `BoardThemeConfig.pieceImageProvider` (host app can override package defaults).
+- Updated docs and example accordingly.
+
+## 1.1.8
+
+- Docs: clarified example pointers (Flutter + backend) for better adoption.

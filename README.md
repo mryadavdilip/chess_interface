@@ -56,9 +56,13 @@ MultiProvider(
 
 ## Example
 
-See [Example](example/main.dart) for more details and refer to comments in the code
+For a runnable Flutter example, see:
+- `example/main.dart`
+
+Also refer to comments inside the example code.
 
 ```dart
+
 import 'dart:math';
 import 'package:chess_interface/arbiter/flutter_arbiter.dart';
 import 'package:chess_interface/extensions/chess_piece.dart';
