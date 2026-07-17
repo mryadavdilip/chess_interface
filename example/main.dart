@@ -196,8 +196,15 @@ class _GameScreenState extends State<GameScreen> {
             config: BoardThemeConfig(
               boardColor: Colors.limeAccent,
 
-              /// To add your own resources, refer to the assets folder structure inside this package. If your resources includes sparate materials for each color, add to path like this: "assets/your_materials_name/black/king.png" (or /white/ for white pieces). and same for all other pieces. If you've simple and fillable png recourses, simply add them in "assets/your_materials_name/bishop.png" path.
+              /// Option A: use package assets (default)
               materialVariety: materialsResources.keys.first,
+
+              /// Option B: use your own (host app) assets.
+              /// When provided, `pieceImageProvider` takes precedence.
+              pieceImageProvider:
+                  (type, color) => AssetImage(
+                    'assets/my_chess_theme/${color.name}/${type.name}.png',
+                  ),
             ),
           ),
           SizedBox(height: 20),

@@ -130,7 +130,11 @@ Provider.of<ChessBoardProvider>(context, listen: false).notify();
 
 ### Theme Customization
 
-Customize the board and pieces using `BoardThemeConfig`. You can define your own colors and piece styles via the asset directory:
+Customize the board and pieces using `BoardThemeConfig`.
+
+#### 1) Use package assets (default)
+
+You can define your own colors and piece styles via the asset directory:
 
 ```dart
 BoardThemeConfig(
@@ -139,9 +143,24 @@ BoardThemeConfig(
 );
 ```
 
+#### 2) Use your own (host app) assets (recommended)
+
+If you want full control over visuals (remote images, SVGs, different folders, etc.), provide `pieceImageProvider`. When set, `ChessBoardWidget` will use it instead of building `Image.asset(...)` paths from `materialVariety/directory/extension`.
+
+```dart
+BoardThemeConfig(
+  boardColor: Colors.green[700],
+  pieceImageProvider: (type, color) {
+    return AssetImage(
+      'assets/my_chess_theme/${color.name}/${type.name}.png',
+    );
+  },
+);
+```
+
 ### Piece Rendering
 
-The `ChessPiece` class loads the appropriate asset based on the type, color, and selected material style:
+The `ChessPiece` class loads the appropriate asset based on the type, color, and selected material style when `pieceImageProvider` is not provided.
 
 ```dart
 ChessPiece(type: PieceType.queen, color: PieceColor.black)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chess_interface/env.dart';
+import 'package:chess_interface/chess_interface_dart.dart';
 
 /// This class is used to store the board theme configuration
 /// It contains the [boardColor] and the [materialVariety] (should be available in this package's assets)
@@ -15,11 +16,31 @@ class BoardThemeConfig {
 
   /// The extension of the image file. Default is png.
   String? extension;
+
+  /// Optional override for piece image rendering.
+  ///
+  /// If provided, [ChessBoardWidget] will use this resolver instead of building a
+  /// `Image.asset(...)` path from [materialVariety]/[directory]/[extension].
+  ///
+  /// This enables host apps to use their own assets, SVGs, remote images, etc.
+  /// without needing to copy assets into this package.
+  ///
+  /// Example:
+  /// ```dart
+  /// BoardThemeConfig(
+  ///   pieceImageProvider: (type, color) => AssetImage(
+  ///     'assets/my_theme/${color.name}/${type.name}.png',
+  ///   ),
+  /// )
+  /// ```
+  ImageProvider Function(PieceType type, PieceColor color)? pieceImageProvider;
+
   BoardThemeConfig({
     this.boardColor,
     this.materialVariety,
     this.directory,
     this.extension,
+    this.pieceImageProvider,
   }) {
     // Set default values if not provided
     boardColor ??= boardColors.first;
@@ -40,5 +61,6 @@ class BoardThemeConfig {
   Map<String, dynamic> toMap() => {
     'boardColor': boardColor?.toARGB32(),
     'materialVariety': materialVariety,
+    // `pieceImageProvider` intentionally not serialized.
   };
 }

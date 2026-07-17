@@ -143,8 +143,13 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
                     decoration: BoxDecoration(
                       color:
                           isWhite
-                              ? widget.config.boardColor!.toMaterialColor()[1]
-                              : widget.config.boardColor!.toMaterialColor()[2],
+                              ? widget.config.boardColor
+                                      ?.toMaterialColor()[1] ??
+                                  Colors.brown[200]
+                              : (widget.config.boardColor
+                                      ?.toMaterialColor()[2] ??
+                                  Colors.brown),
+
                       border:
                           selectedPosition == pos
                               ? Border.all(
@@ -168,32 +173,58 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
                               transform: GradientRotation(45),
                               colors: [
                                 widget.game.turn.toColor(),
-                                widget.config.boardColor!
-                                        .toMaterialColor()[1] ??
+                                widget.config.boardColor
+                                        ?.toMaterialColor()[1] ??
                                     Colors.white,
-                                widget.config.boardColor!
-                                        .toMaterialColor()[2] ??
-                                    Colors.black,
+                                (widget.config.boardColor
+                                        ?.toMaterialColor()[2] ??
+                                    Colors.black),
                               ],
                             ),
                           ),
-                        FutureBuilder(
-                          key: ValueKey('$row-$col-${piece?.type}'),
-                          future: piece?.getResource(
-                            widget.config.materialVariety!,
-                            directory: widget.config.directory!,
-                            extension: widget.config.extension!,
-                          ),
-                          builder: (context, ss) {
+                        Builder(
+                          builder: (_) {
+                            if (piece == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final pieceProvider =
+                                widget.config.pieceImageProvider;
+
+                            final Widget pieceWidget =
+                                pieceProvider != null
+                                    ? Image(
+                                      image: pieceProvider(
+                                        piece.type,
+                                        piece.color,
+                                      ),
+                                      fit: BoxFit.contain,
+                                      colorBlendMode: null,
+                                    )
+                                    : FutureBuilder(
+                                      key: ValueKey('$row-$col-${piece.type}'),
+                                      future: piece.getResource(
+                                        widget.config.materialVariety ?? '',
+                                        directory:
+                                            widget.config.directory ?? '',
+                                        extension:
+                                            widget.config.extension ?? 'png',
+                                      ),
+
+                                      builder: (context, ss) {
+                                        return ss.data ?? SizedBox.shrink();
+                                      },
+                                    );
+
                             return Transform.rotate(
                               angle: angle,
                               child: Padding(
                                 padding: EdgeInsets.all(
-                                  piece?.type == PieceType.pawn
+                                  piece.type == PieceType.pawn
                                       ? boxSize * 0.2
                                       : boxSize * 0.1,
                                 ),
-                                child: ss.data ?? SizedBox.shrink(),
+                                child: pieceWidget,
                               ),
                             );
                           },

@@ -4,8 +4,10 @@ import 'package:chess_interface/extensions/piece_color.dart';
 import 'package:flutter/widgets.dart';
 
 extension ChessPieceExtension on ChessPiece {
-  /// Provide [directory] (e.g, 'assets' or 'assets/materials') if you want to use custom resources.
-  /// Provide [extension] (e.g, png, jpg, jpeg) for the images you've inside the resource structured directory.
+  /// Default asset-path based resource loader.
+  ///
+  /// Host apps should generally prefer passing [BoardThemeConfig.pieceImageProvider]
+  /// instead of relying on this method.
   Future<Image> getResource(
     String materialVariety, {
     required String directory,
