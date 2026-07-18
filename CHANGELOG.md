@@ -53,3 +53,7 @@
 ## 1.2.0
 
 - Docs: clarified example pointers (Flutter + backend) for better adoption.
+
+## 1.2.1
+
+- Added piece facing direction customization
