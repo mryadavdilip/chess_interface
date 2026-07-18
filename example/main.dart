@@ -80,6 +80,12 @@ class _GameScreenState extends State<GameScreen> {
     // get full move number (int)
     game!.fullMoveNumber;
 
+    // List of pieces taken by white player
+    game!.whiteTakenPieces;
+
+    // List of pieces taken by black player
+    game!.blackTakenPieces;
+
     // List of full FEN strings. Doesn't includes current state
     game!.history;
 
