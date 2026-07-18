@@ -15,6 +15,21 @@ class ChessBoardWidget extends StatefulWidget {
 
   final FlutterArbiter arbiter;
 
+  /// Controls how piece images are rotated/facing in the UI, independently from
+  /// the board coordinate rotation.
+  ///
+  /// - When null: keeps existing behavior (pieces use the same rotation as the board)
+  /// - When true: pieces rotate by 180 degrees (pi) regardless of board/turn.
+  /// - When false: pieces do not receive extra 180-degree rotation.
+  final bool? pieceFacingPi;
+
+  /// If provided, forces piece image facing per color.
+  ///
+  /// - [PieceColor.white] / [PieceColor.black] => whether that color's piece image
+  ///   should be rotated by 180 degrees (pi).
+  /// - When null: behavior is driven by [pieceFacingPi] (or default = null).
+  final Map<PieceColor, bool>? pieceFacingPiByColor;
+
   /// Define which side the player has to play, black or white and the other pieces will be no longer be interactive for the player. Keep this null when both players are playing in same device (i.e. in case of offline match).
   final PieceColor? playAs;
 
@@ -41,6 +56,8 @@ class ChessBoardWidget extends StatefulWidget {
     this.onMove,
     this.rotateBoard = false,
     this.spectateInitially = true,
+    this.pieceFacingPi,
+    this.pieceFacingPiByColor,
     required this.boardSize,
     required this.config,
   });
@@ -216,8 +233,15 @@ class _ChessBoardWidgetState extends State<ChessBoardWidget> {
                                       },
                                     );
 
+                            final bool shouldFlipPieces =
+                                widget.pieceFacingPiByColor != null
+                                    ? (widget.pieceFacingPiByColor![piece
+                                            .color] ??
+                                        false)
+                                    : (widget.pieceFacingPi == true);
+
                             return Transform.rotate(
-                              angle: angle,
+                              angle: shouldFlipPieces ? pi : angle,
                               child: Padding(
                                 padding: EdgeInsets.all(
                                   piece.type == PieceType.pawn
